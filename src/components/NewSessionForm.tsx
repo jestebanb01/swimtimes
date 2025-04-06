@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSwim } from '@/contexts/SwimContext';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -22,6 +22,28 @@ const NewSessionForm: React.FC = () => {
   const [description, setDescription] = useState<string>('');
   const [poolLength, setPoolLength] = useState<PoolLength>('25m');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [availableDistances, setAvailableDistances] = useState<number[]>([50, 100, 200, 400, 800, 1500, 3000, 5000]);
+
+  // Update available distances when style changes
+  useEffect(() => {
+    let distances: number[] = [];
+    
+    if (style === 'freestyle') {
+      distances = [50, 100, 200, 400, 800, 1500, 3000, 5000];
+    } else if (style === 'medley') {
+      distances = [50, 100, 200, 400];
+    } else {
+      // backstroke, butterfly, breaststroke
+      distances = [50, 100, 200];
+    }
+    
+    setAvailableDistances(distances);
+    
+    // If current distance is not in the new available distances, reset to the first available
+    if (!distances.includes(distance)) {
+      setDistance(distances[0]);
+    }
+  }, [style]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -31,8 +53,15 @@ const NewSessionForm: React.FC = () => {
     
     if (!distance) {
       newErrors.distance = 'Distance is required';
-    } else if (distance <= 0) {
-      newErrors.distance = 'Distance must be a positive number';
+    } else {
+      // Validate distance based on swim style
+      if (style === 'freestyle' && ![50, 100, 200, 400, 800, 1500, 3000, 5000].includes(distance)) {
+        newErrors.distance = 'For freestyle, distance must be 50, 100, 200, 400, 800, 1500, 3000 or 5000 meters';
+      } else if (style === 'medley' && ![50, 100, 200, 400].includes(distance)) {
+        newErrors.distance = 'For medley, distance must be 50, 100, 200 or 400 meters';
+      } else if (['backstroke', 'butterfly', 'breaststroke'].includes(style) && ![50, 100, 200].includes(distance)) {
+        newErrors.distance = 'For backstroke, butterfly or breaststroke, distance must be 50, 100 or 200 meters';
+      }
     }
     
     const parsedTime = parseTimeString(timeInput);
@@ -125,6 +154,7 @@ const NewSessionForm: React.FC = () => {
           <option value="breaststroke">Breaststroke</option>
           <option value="butterfly">Butterfly</option>
           <option value="backstroke">Backstroke</option>
+          <option value="medley">Medley</option>
         </select>
         {errors.style && <p className="text-red-500 text-sm">{errors.style}</p>}
       </div>
@@ -156,14 +186,16 @@ const NewSessionForm: React.FC = () => {
         <label htmlFor="distance" className="block text-sm font-medium text-gray-700">
           Distance (meters)
         </label>
-        <input
+        <select
           id="distance"
-          type="number"
           value={distance}
           onChange={(e) => setDistance(Number(e.target.value))}
-          min="1"
           className="swim-input"
-        />
+        >
+          {availableDistances.map((dist) => (
+            <option key={dist} value={dist}>{dist}</option>
+          ))}
+        </select>
         {errors.distance && <p className="text-red-500 text-sm">{errors.distance}</p>}
       </div>
       
