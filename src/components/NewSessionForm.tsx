@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { CalendarIcon } from 'lucide-react';
-import { SwimStyle, SwimTime } from '@/types/swim';
+import { SwimStyle, SwimTime, PoolLength } from '@/types/swim';
 import { parseTimeString } from '@/utils/timeUtils';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
 const NewSessionForm: React.FC = () => {
   const { addSession } = useSwim();
@@ -18,6 +20,7 @@ const NewSessionForm: React.FC = () => {
   const [timeInput, setTimeInput] = useState<string>('00:00.00');
   const [location, setLocation] = useState<string>('');
   const [description, setDescription] = useState<string>('');
+  const [poolLength, setPoolLength] = useState<PoolLength>('25m');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validateForm = () => {
@@ -38,6 +41,7 @@ const NewSessionForm: React.FC = () => {
     }
     
     if (!location.trim()) newErrors.location = 'Location is required';
+    if (!poolLength) newErrors.poolLength = 'Pool length is required';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -56,7 +60,8 @@ const NewSessionForm: React.FC = () => {
       distance,
       time: parsedTime,
       location,
-      description
+      description,
+      poolLength
     });
     
     // Reset form
@@ -66,6 +71,7 @@ const NewSessionForm: React.FC = () => {
     setTimeInput('00:00.00');
     setLocation('');
     setDescription('');
+    setPoolLength('25m');
     setErrors({});
   };
 
@@ -121,6 +127,28 @@ const NewSessionForm: React.FC = () => {
           <option value="backstroke">Backstroke</option>
         </select>
         {errors.style && <p className="text-red-500 text-sm">{errors.style}</p>}
+      </div>
+      
+      {/* Pool Length Field */}
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">
+          Pool Length
+        </label>
+        <RadioGroup 
+          value={poolLength} 
+          onValueChange={(value) => setPoolLength(value as PoolLength)}
+          className="flex gap-4"
+        >
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="25m" id="r1" />
+            <Label htmlFor="r1">25m</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="50m" id="r2" />
+            <Label htmlFor="r2">50m</Label>
+          </div>
+        </RadioGroup>
+        {errors.poolLength && <p className="text-red-500 text-sm">{errors.poolLength}</p>}
       </div>
       
       {/* Distance Field */}
