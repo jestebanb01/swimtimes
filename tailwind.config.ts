@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,21 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Swimming app custom colors
+				aqua: {
+					50: '#effaff',
+					100: '#def5ff',
+					200: '#b6ecff',
+					300: '#75deff',
+					400: '#2cceff',
+					500: '#00b8fa',
+					600: '#0093d4',
+					700: '#0076ab',
+					800: '#06638d',
+					900: '#0c5374',
+					950: '#083651',
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +99,22 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'ripple': {
+					'0%': { 
+						transform: 'scale(0)',
+						opacity: '0.7',
+					},
+					'100%': { 
+						transform: 'scale(2)',
+						opacity: '0',
+					},
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'ripple': 'ripple 1s ease-out infinite',
 			}
 		}
 	},
