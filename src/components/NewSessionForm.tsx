@@ -23,6 +23,7 @@ const NewSessionForm: React.FC = () => {
   const [poolLength, setPoolLength] = useState<PoolLength>('25m');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [availableDistances, setAvailableDistances] = useState<number[]>([50, 100, 200, 400, 800, 1500, 3000, 5000]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Update available distances when style changes
   useEffect(() => {
@@ -76,32 +77,37 @@ const NewSessionForm: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) return;
     
-    const parsedTime = parseTimeString(timeInput) as SwimTime;
-    
-    addSession({
-      date,
-      style,
-      distance,
-      time: parsedTime,
-      location,
-      description,
-      poolLength
-    });
-    
-    // Reset form
-    setDate(new Date());
-    setStyle('freestyle');
-    setDistance(100);
-    setTimeInput('00:00.00');
-    setLocation('');
-    setDescription('');
-    setPoolLength('25m');
-    setErrors({});
+    try {
+      setIsSubmitting(true);
+      const parsedTime = parseTimeString(timeInput) as SwimTime;
+      
+      await addSession({
+        date,
+        style,
+        distance,
+        time: parsedTime,
+        location,
+        description,
+        poolLength
+      });
+      
+      // Reset form
+      setDate(new Date());
+      setStyle('freestyle');
+      setDistance(100);
+      setTimeInput('00:00.00');
+      setLocation('');
+      setDescription('');
+      setPoolLength('25m');
+      setErrors({});
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -250,8 +256,9 @@ const NewSessionForm: React.FC = () => {
       <Button 
         type="submit" 
         className="w-full bg-aqua-600 text-white hover:bg-aqua-700"
+        disabled={isSubmitting}
       >
-        Save Session
+        {isSubmitting ? "Saving..." : "Save Session"}
       </Button>
     </form>
   );

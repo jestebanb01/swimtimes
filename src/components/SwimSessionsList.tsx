@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useSwim } from '@/contexts/SwimContext';
 import { Button } from '@/components/ui/button';
@@ -35,8 +36,12 @@ import {
   ArrowUp, 
   ArrowDown, 
   Calendar as CalendarIcon, 
-  Clock as ClockIcon 
+  Clock as ClockIcon,
+  MoreVertical,
+  Edit,
+  Trash
 } from 'lucide-react';
+import EditSessionForm from './EditSessionForm';
 
 const styleNames: Record<SwimStyle, string> = {
   freestyle: 'Freestyle',
@@ -47,10 +52,11 @@ const styleNames: Record<SwimStyle, string> = {
 };
 
 const SwimSessionsList: React.FC = () => {
-  const { sessions, deleteSession } = useSwim();
+  const { sessions, deleteSession, loading } = useSwim();
   const [sortField, setSortField] = useState<keyof SwimSession>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [filterStyle, setFilterStyle] = useState<SwimStyle | 'all'>('all');
+  const [editingSession, setEditingSession] = useState<SwimSession | null>(null);
 
   const toggleSortDirection = () => {
     setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -63,6 +69,14 @@ const SwimSessionsList: React.FC = () => {
       setSortField(field);
       setSortDirection('asc');
     }
+  };
+
+  const handleEdit = (session: SwimSession) => {
+    setEditingSession(session);
+  };
+
+  const closeEditForm = () => {
+    setEditingSession(null);
   };
 
   const filteredSessions = sessions.filter(session => 
@@ -92,6 +106,14 @@ const SwimSessionsList: React.FC = () => {
   });
 
   const SortIcon = sortDirection === 'asc' ? ArrowUp : ArrowDown;
+
+  if (loading) {
+    return (
+      <div className="flex justify-center p-8">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-aqua-600"></div>
+      </div>
+    );
+  }
 
   if (sessions.length === 0) {
     return (
@@ -175,8 +197,50 @@ const SwimSessionsList: React.FC = () => {
                     {format(session.date, 'MMMM d, yyyy')}
                   </CardDescription>
                 </div>
-                <div className="bg-aqua-100 text-aqua-800 px-3 py-1 rounded-full text-sm font-medium">
-                  {session.distance}m
+                <div className="flex items-center">
+                  <div className="bg-aqua-100 text-aqua-800 px-3 py-1 rounded-full text-sm font-medium mr-2">
+                    {session.distance}m
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleEdit(session)}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="text-red-600">
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <div className="flex items-center w-full">
+                              <Trash className="mr-2 h-4 w-4" />
+                              Delete
+                            </div>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will permanently delete this swim session record.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => deleteSession(session.id)}
+                                className="bg-red-500 hover:bg-red-600"
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </CardHeader>
@@ -197,38 +261,17 @@ const SwimSessionsList: React.FC = () => {
                 </p>
               )}
             </CardContent>
-            <CardFooter className="pt-2">
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50 w-full"
-                  >
-                    Delete
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This will permanently delete this swim session record.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => deleteSession(session.id)}
-                      className="bg-red-500 hover:bg-red-600"
-                    >
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </CardFooter>
           </Card>
         ))}
       </div>
+
+      {editingSession && (
+        <EditSessionForm 
+          session={editingSession} 
+          isOpen={!!editingSession} 
+          onClose={closeEditForm} 
+        />
+      )}
     </div>
   );
 };
