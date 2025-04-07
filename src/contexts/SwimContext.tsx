@@ -4,6 +4,9 @@ import { SwimSession, SwimTime, SwimStyle, PoolLength } from '@/types/swim';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { Database } from '@/integrations/supabase/types';
+
+type SwimSessionRow = Database['public']['Tables']['swim_sessions']['Row'];
 
 interface SwimContextType {
   sessions: SwimSession[];
@@ -52,7 +55,7 @@ export const SwimProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       // Convert from database format to application format
-      const formattedSessions: SwimSession[] = data.map(session => ({
+      const formattedSessions: SwimSession[] = (data || []).map(session => ({
         id: session.id,
         date: new Date(session.date),
         style: session.style as SwimStyle,
@@ -113,22 +116,24 @@ export const SwimProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
 
-      const newSession: SwimSession = {
-        id: data.id,
-        date: new Date(data.date),
-        style: data.style as SwimStyle,
-        distance: data.distance,
-        time: {
-          minutes: data.minutes,
-          seconds: data.seconds,
-          centiseconds: data.centiseconds,
-        },
-        location: data.location,
-        description: data.description || '',
-        poolLength: data.pool_length as PoolLength,
-      };
+      if (data) {
+        const newSession: SwimSession = {
+          id: data.id,
+          date: new Date(data.date),
+          style: data.style as SwimStyle,
+          distance: data.distance,
+          time: {
+            minutes: data.minutes,
+            seconds: data.seconds,
+            centiseconds: data.centiseconds,
+          },
+          location: data.location,
+          description: data.description || '',
+          poolLength: data.pool_length as PoolLength,
+        };
 
-      setSessions(prev => [newSession, ...prev]);
+        setSessions(prev => [newSession, ...prev]);
+      }
       
       toast({
         title: "Session added",
