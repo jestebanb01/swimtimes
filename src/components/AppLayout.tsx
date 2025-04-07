@@ -7,9 +7,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut } from 'lucide-react';
+import { User, LogOut, Settings, Dumbbell, Swimming } from 'lucide-react';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -34,6 +35,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             <Link to="/log" className="text-gray-600 hover:text-gray-900">
               Log Session
             </Link>
+            <Link to="/log-training" className="text-gray-600 hover:text-gray-900">
+              Log Training
+            </Link>
             <Link to="/history" className="text-gray-600 hover:text-gray-900">
               History
             </Link>
@@ -50,6 +54,29 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                 <div className="flex flex-col space-y-1 p-2">
                   <p className="text-sm font-medium">{user?.email}</p>
                 </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={() => navigate('/profile')}
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Profile Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={() => navigate('/log')}
+                >
+                  <Swimming className="mr-2 h-4 w-4" />
+                  <span>Log Swim Session</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={() => navigate('/log-training')}
+                >
+                  <Dumbbell className="mr-2 h-4 w-4" />
+                  <span>Log Training</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem 
                   className="cursor-pointer text-red-500 focus:text-red-500"
                   onClick={() => signOut()}
@@ -69,6 +96,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             </Link>
             <Link to="/log" className="text-gray-600 hover:text-gray-900 flex-1 text-center py-1">
               Log Session
+            </Link>
+            <Link to="/log-training" className="text-gray-600 hover:text-gray-900 flex-1 text-center py-1">
+              Log Training
             </Link>
             <Link to="/history" className="text-gray-600 hover:text-gray-900 flex-1 text-center py-1">
               History

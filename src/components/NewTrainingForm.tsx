@@ -1,44 +1,41 @@
 
 import React, { useState } from 'react';
 import { useTraining } from '@/contexts/TrainingContext';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
-import { CalendarIcon } from 'lucide-react';
-import { TrainingIntensity } from '@/types/swim';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { TrainingIntensity } from '@/types/swim';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
 const NewTrainingForm: React.FC = () => {
-  const { addTrainingSession } = useTraining();
-  const [date, setDate] = useState<Date>(new Date());
+  const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [intensity, setIntensity] = useState<TrainingIntensity>('Medium');
   const [distance, setDistance] = useState<string>('');
   const [description, setDescription] = useState<string>('');
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const { addTrainingSession } = useTraining();
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
-    if (!date) newErrors.date = 'Date is required';
-    if (!intensity) newErrors.intensity = 'Intensity is required';
+    if (!date) {
+      newErrors.date = 'Date is required';
+    }
     
-    if (!distance.trim()) {
+    if (!distance) {
       newErrors.distance = 'Distance is required';
-    } else {
-      const parsedDistance = parseInt(distance);
-      if (isNaN(parsedDistance) || parsedDistance <= 0) {
-        newErrors.distance = 'Distance must be a positive number';
-      }
+    } else if (isNaN(Number(distance)) || Number(distance) <= 0) {
+      newErrors.distance = 'Distance must be a positive number';
     }
     
     setErrors(newErrors);
@@ -50,120 +47,96 @@ const NewTrainingForm: React.FC = () => {
     
     if (!validateForm()) return;
     
+    setIsSubmitting(true);
+    
     try {
-      setIsSubmitting(true);
-      
       await addTrainingSession({
-        date,
+        date: new Date(date),
         intensity,
-        distance: parseInt(distance),
+        distance: Number(distance),
         description
       });
       
       // Reset form
-      setDate(new Date());
+      setDate(new Date().toISOString().split('T')[0]);
       setIntensity('Medium');
       setDistance('');
       setDescription('');
       setErrors({});
+    } catch (error) {
+      console.error('Error adding training session:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-lg shadow">
-      <h2 className="text-2xl font-bold text-aqua-800 mb-4">Log Training Session</h2>
+    <Card className="max-w-2xl mx-auto">
+      <CardHeader>
+        <CardTitle>Log Training Session</CardTitle>
+        <CardDescription>
+          Record your training sessions to track your progress
+        </CardDescription>
+      </CardHeader>
       
-      {/* Date Field */}
-      <div className="space-y-2">
-        <label htmlFor="date" className="block text-sm font-medium text-gray-700">
-          Date
-        </label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant={"outline"}
-              className={cn(
-                "w-full justify-start text-left font-normal",
-                !date && "text-muted-foreground"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {date ? format(date, 'PPP') : <span>Select a date</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={(date) => date && setDate(date)}
-              initialFocus
-              className="pointer-events-auto"
+      <form onSubmit={handleSubmit}>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="date">Date</Label>
+            <Input
+              id="date"
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
             />
-          </PopoverContent>
-        </Popover>
-        {errors.date && <p className="text-red-500 text-sm">{errors.date}</p>}
-      </div>
-      
-      {/* Intensity Field */}
-      <div className="space-y-2">
-        <label htmlFor="intensity" className="block text-sm font-medium text-gray-700">
-          Training Intensity
-        </label>
-        <Select value={intensity} onValueChange={(value: TrainingIntensity) => setIntensity(value)}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select intensity" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Light">Light</SelectItem>
-            <SelectItem value="Medium">Medium</SelectItem>
-            <SelectItem value="Hard">Hard</SelectItem>
-          </SelectContent>
-        </Select>
-        {errors.intensity && <p className="text-red-500 text-sm">{errors.intensity}</p>}
-      </div>
-      
-      {/* Distance Field */}
-      <div className="space-y-2">
-        <label htmlFor="distance" className="block text-sm font-medium text-gray-700">
-          Distance (meters)
-        </label>
-        <Input
-          id="distance"
-          type="number"
-          value={distance}
-          onChange={(e) => setDistance(e.target.value)}
-          placeholder="Enter distance in meters"
-          min="1"
-          className="swim-input"
-        />
-        {errors.distance && <p className="text-red-500 text-sm">{errors.distance}</p>}
-      </div>
-      
-      {/* Description Field */}
-      <div className="space-y-2">
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-          Description
-        </label>
-        <textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Notes about this training session..."
-          rows={3}
-          className="swim-input"
-        />
-      </div>
-      
-      <Button 
-        type="submit" 
-        className="w-full bg-aqua-600 text-white hover:bg-aqua-700"
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? "Saving..." : "Save Training Session"}
-      </Button>
-    </form>
+            {errors.date && <p className="text-red-500 text-sm">{errors.date}</p>}
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="intensity">Intensity</Label>
+            <Select value={intensity} onValueChange={(value: TrainingIntensity) => setIntensity(value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select intensity" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Light">Light</SelectItem>
+                <SelectItem value="Medium">Medium</SelectItem>
+                <SelectItem value="Hard">Hard</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="distance">Distance (meters)</Label>
+            <Input
+              id="distance"
+              type="number"
+              value={distance}
+              onChange={(e) => setDistance(e.target.value)}
+              placeholder="e.g., 1000"
+            />
+            {errors.distance && <p className="text-red-500 text-sm">{errors.distance}</p>}
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Add details about your training session..."
+              rows={3}
+            />
+          </div>
+        </CardContent>
+        
+        <CardFooter>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? 'Logging Session...' : 'Log Training Session'}
+          </Button>
+        </CardFooter>
+      </form>
+    </Card>
   );
 };
 

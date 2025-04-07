@@ -11,6 +11,7 @@ interface TrainingContextType {
   trainingSessions: TrainingSession[];
   addTrainingSession: (session: Omit<TrainingSession, 'id'>) => Promise<void>;
   deleteTrainingSession: (id: string) => Promise<void>;
+  updateTrainingSession: (session: TrainingSession) => Promise<void>;
   loading: boolean;
 }
 
@@ -77,6 +78,25 @@ export const TrainingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  const updateTrainingSession = async (session: TrainingSession) => {
+    try {
+      setTrainingSessions(prev => 
+        prev.map(item => item.id === session.id ? session : item)
+      );
+      
+      toast({
+        title: "Training session updated",
+        description: "Your training session has been updated successfully.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error updating training session",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const deleteTrainingSession = async (id: string) => {
     try {
       setTrainingSessions(prev => prev.filter(session => session.id !== id));
@@ -95,7 +115,7 @@ export const TrainingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   return (
-    <TrainingContext.Provider value={{ trainingSessions, addTrainingSession, deleteTrainingSession, loading }}>
+    <TrainingContext.Provider value={{ trainingSessions, addTrainingSession, updateTrainingSession, deleteTrainingSession, loading }}>
       {children}
     </TrainingContext.Provider>
   );
