@@ -20,16 +20,39 @@ const Index = () => {
             <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
               Start tracking your swimming sessions to monitor your progress and improve your performance.
             </p>
-            <Link to="/log">
-              <Button className="bg-aqua-600 hover:bg-aqua-700 text-white">
-                Log Your First Swim
-              </Button>
-            </Link>
+            <div className="flex flex-wrap gap-4 justify-center">
+              <Link to="/log">
+                <Button className="bg-aqua-600 hover:bg-aqua-700 text-white">
+                  Log Your First Swim
+                </Button>
+              </Link>
+              <Link to="/log-training">
+                <Button variant="outline" className="border-aqua-600 text-aqua-600 hover:bg-aqua-50">
+                  Log Training Session
+                </Button>
+              </Link>
+            </div>
           </div>
         )}
         
         {/* Dashboard */}
         <SwimDashboard />
+        
+        {/* Action buttons for logged-in users with sessions */}
+        {sessions.length > 0 && (
+          <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+            <Link to="/log">
+              <Button className="bg-aqua-600 hover:bg-aqua-700 text-white">
+                Log New Swim
+              </Button>
+            </Link>
+            <Link to="/log-training">
+              <Button variant="outline" className="border-aqua-600 text-aqua-600 hover:bg-aqua-50">
+                Log Training Session
+              </Button>
+            </Link>
+          </div>
+        )}
         
         {/* Recent sessions */}
         {sessions.length > 0 && (
