@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, Settings, Dumbbell, Swimming } from 'lucide-react';
+import { User, LogOut, Settings, Dumbbell, Pool } from 'lucide-react';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -66,7 +66,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                   className="cursor-pointer"
                   onClick={() => navigate('/log')}
                 >
-                  <Swimming className="mr-2 h-4 w-4" />
+                  <Pool className="mr-2 h-4 w-4" />
                   <span>Log Swim Session</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
