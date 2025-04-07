@@ -6,10 +6,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SwimProvider } from "@/contexts/SwimContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ProfileProvider } from "@/contexts/ProfileContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import LogSession from "./pages/LogSession";
 import History from "./pages/History";
+import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -22,27 +24,34 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <SwimProvider>
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/" element={
-                <ProtectedRoute>
-                  <Index />
-                </ProtectedRoute>
-              } />
-              <Route path="/log" element={
-                <ProtectedRoute>
-                  <LogSession />
-                </ProtectedRoute>
-              } />
-              <Route path="/history" element={
-                <ProtectedRoute>
-                  <History />
-                </ProtectedRoute>
-              } />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </SwimProvider>
+          <ProfileProvider>
+            <SwimProvider>
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/" element={
+                  <ProtectedRoute>
+                    <Index />
+                  </ProtectedRoute>
+                } />
+                <Route path="/log" element={
+                  <ProtectedRoute>
+                    <LogSession />
+                  </ProtectedRoute>
+                } />
+                <Route path="/history" element={
+                  <ProtectedRoute>
+                    <History />
+                  </ProtectedRoute>
+                } />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </SwimProvider>
+          </ProfileProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

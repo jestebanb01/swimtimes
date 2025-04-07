@@ -39,9 +39,12 @@ import {
   Clock as ClockIcon,
   MoreVertical,
   Edit,
-  Trash
+  Trash,
+  Timer,
+  Waves
 } from 'lucide-react';
 import EditSessionForm from './EditSessionForm';
+import { Badge } from '@/components/ui/badge';
 
 const styleNames: Record<SwimStyle, string> = {
   freestyle: 'Freestyle',
@@ -252,6 +255,18 @@ const SwimSessionsList: React.FC = () => {
               <p className="text-sm text-muted-foreground mt-1">
                 Pace: {calculatePace(session.time, session.distance)}
               </p>
+              
+              <div className="flex flex-wrap gap-2 mt-2">
+                <Badge variant="outline" className="flex items-center gap-1">
+                  <Timer className="h-3 w-3" />
+                  {session.chronoType || 'Manual'}
+                </Badge>
+                <Badge variant="outline" className="flex items-center gap-1">
+                  <Waves className="h-3 w-3" />
+                  {session.sessionType || 'Pool'}
+                </Badge>
+              </div>
+              
               <p className="text-sm mt-2">
                 <span className="font-medium">Location:</span> {session.location}
               </p>

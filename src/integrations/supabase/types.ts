@@ -11,25 +11,38 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          avatar_url: string | null
           created_at: string
+          first_name: string | null
           id: string
+          last_name: string | null
           username: string | null
+          year_of_birth: number | null
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string
+          first_name?: string | null
           id: string
+          last_name?: string | null
           username?: string | null
+          year_of_birth?: number | null
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string
+          first_name?: string | null
           id?: string
+          last_name?: string | null
           username?: string | null
+          year_of_birth?: number | null
         }
         Relationships: []
       }
       swim_sessions: {
         Row: {
           centiseconds: number
+          chrono_type: string
           created_at: string
           date: string
           description: string | null
@@ -39,11 +52,13 @@ export type Database = {
           minutes: number
           pool_length: string
           seconds: number
+          session_type: string
           style: string
           user_id: string
         }
         Insert: {
           centiseconds: number
+          chrono_type?: string
           created_at?: string
           date?: string
           description?: string | null
@@ -53,11 +68,13 @@ export type Database = {
           minutes: number
           pool_length: string
           seconds: number
+          session_type?: string
           style: string
           user_id: string
         }
         Update: {
           centiseconds?: number
+          chrono_type?: string
           created_at?: string
           date?: string
           description?: string | null
@@ -67,6 +84,7 @@ export type Database = {
           minutes?: number
           pool_length?: string
           seconds?: number
+          session_type?: string
           style?: string
           user_id?: string
         }

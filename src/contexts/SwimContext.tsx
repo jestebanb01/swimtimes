@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { SwimSession, SwimTime, SwimStyle, PoolLength } from '@/types/swim';
+import { SwimSession, SwimTime, SwimStyle, PoolLength, ChronoType, SessionType } from '@/types/swim';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -68,6 +68,8 @@ export const SwimProvider: React.FC<{ children: React.ReactNode }> = ({ children
         location: session.location,
         description: session.description || '',
         poolLength: session.pool_length as PoolLength,
+        chronoType: (session.chrono_type || 'manual') as ChronoType,
+        sessionType: (session.session_type || 'pool') as SessionType
       }));
 
       setSessions(formattedSessions);
@@ -108,6 +110,8 @@ export const SwimProvider: React.FC<{ children: React.ReactNode }> = ({ children
           location: sessionData.location,
           description: sessionData.description,
           pool_length: sessionData.poolLength,
+          chrono_type: sessionData.chronoType,
+          session_type: sessionData.sessionType
         }])
         .select()
         .single();
@@ -130,6 +134,8 @@ export const SwimProvider: React.FC<{ children: React.ReactNode }> = ({ children
           location: data.location,
           description: data.description || '',
           poolLength: data.pool_length as PoolLength,
+          chronoType: data.chrono_type as ChronoType,
+          sessionType: data.session_type as SessionType
         };
 
         setSessions(prev => [newSession, ...prev]);
@@ -190,6 +196,8 @@ export const SwimProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (sessionUpdate.location) updateData.location = sessionUpdate.location;
       if ('description' in sessionUpdate) updateData.description = sessionUpdate.description;
       if (sessionUpdate.poolLength) updateData.pool_length = sessionUpdate.poolLength;
+      if (sessionUpdate.chronoType) updateData.chrono_type = sessionUpdate.chronoType;
+      if (sessionUpdate.sessionType) updateData.session_type = sessionUpdate.sessionType;
 
       const { error } = await supabase
         .from('swim_sessions')

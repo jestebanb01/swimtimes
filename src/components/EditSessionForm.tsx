@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { CalendarIcon } from 'lucide-react';
-import { SwimStyle, SwimTime, PoolLength, SwimSession } from '@/types/swim';
+import { SwimStyle, SwimTime, PoolLength, SwimSession, ChronoType, SessionType } from '@/types/swim';
 import { parseTimeString, formatSwimTime } from '@/utils/timeUtils';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
@@ -18,6 +18,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface EditSessionFormProps {
   session: SwimSession;
@@ -34,6 +41,8 @@ const EditSessionForm: React.FC<EditSessionFormProps> = ({ session, isOpen, onCl
   const [location, setLocation] = useState<string>(session.location);
   const [description, setDescription] = useState<string>(session.description);
   const [poolLength, setPoolLength] = useState<PoolLength>(session.poolLength);
+  const [chronoType, setChronoType] = useState<ChronoType>(session.chronoType || 'manual');
+  const [sessionType, setSessionType] = useState<SessionType>(session.sessionType || 'pool');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [availableDistances, setAvailableDistances] = useState<number[]>([50, 100, 200, 400, 800, 1500, 3000, 5000]);
 
@@ -84,6 +93,8 @@ const EditSessionForm: React.FC<EditSessionFormProps> = ({ session, isOpen, onCl
     
     if (!location.trim()) newErrors.location = 'Location is required';
     if (!poolLength) newErrors.poolLength = 'Pool length is required';
+    if (!chronoType) newErrors.chronoType = 'Chrono type is required';
+    if (!sessionType) newErrors.sessionType = 'Session type is required';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -103,7 +114,9 @@ const EditSessionForm: React.FC<EditSessionFormProps> = ({ session, isOpen, onCl
       time: parsedTime,
       location,
       description,
-      poolLength
+      poolLength,
+      chronoType,
+      sessionType
     });
     
     onClose();
@@ -153,18 +166,18 @@ const EditSessionForm: React.FC<EditSessionFormProps> = ({ session, isOpen, onCl
             <label htmlFor="style" className="block text-sm font-medium text-gray-700">
               Swim Style
             </label>
-            <select
-              id="style"
-              value={style}
-              onChange={(e) => setStyle(e.target.value as SwimStyle)}
-              className="swim-input"
-            >
-              <option value="freestyle">Freestyle</option>
-              <option value="breaststroke">Breaststroke</option>
-              <option value="butterfly">Butterfly</option>
-              <option value="backstroke">Backstroke</option>
-              <option value="medley">Medley</option>
-            </select>
+            <Select value={style} onValueChange={(value: SwimStyle) => setStyle(value)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select style" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="freestyle">Freestyle</SelectItem>
+                <SelectItem value="breaststroke">Breaststroke</SelectItem>
+                <SelectItem value="butterfly">Butterfly</SelectItem>
+                <SelectItem value="backstroke">Backstroke</SelectItem>
+                <SelectItem value="medley">Medley</SelectItem>
+              </SelectContent>
+            </Select>
             {errors.style && <p className="text-red-500 text-sm">{errors.style}</p>}
           </div>
           
@@ -189,22 +202,66 @@ const EditSessionForm: React.FC<EditSessionFormProps> = ({ session, isOpen, onCl
             </RadioGroup>
             {errors.poolLength && <p className="text-red-500 text-sm">{errors.poolLength}</p>}
           </div>
+
+          {/* Chrono Type Field */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Chrono Type
+            </label>
+            <RadioGroup 
+              value={chronoType} 
+              onValueChange={(value) => setChronoType(value as ChronoType)}
+              className="flex gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="manual" id="chrono1" />
+                <Label htmlFor="chrono1">Manual</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="electronic" id="chrono2" />
+                <Label htmlFor="chrono2">Electronic</Label>
+              </div>
+            </RadioGroup>
+            {errors.chronoType && <p className="text-red-500 text-sm">{errors.chronoType}</p>}
+          </div>
+
+          {/* Session Type Field */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Session Type
+            </label>
+            <RadioGroup 
+              value={sessionType} 
+              onValueChange={(value) => setSessionType(value as SessionType)}
+              className="flex gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="pool" id="session1" />
+                <Label htmlFor="session1">Pool</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="open water" id="session2" />
+                <Label htmlFor="session2">Open Water</Label>
+              </div>
+            </RadioGroup>
+            {errors.sessionType && <p className="text-red-500 text-sm">{errors.sessionType}</p>}
+          </div>
           
           {/* Distance Field */}
           <div className="space-y-2">
             <label htmlFor="distance" className="block text-sm font-medium text-gray-700">
               Distance (meters)
             </label>
-            <select
-              id="distance"
-              value={distance}
-              onChange={(e) => setDistance(Number(e.target.value))}
-              className="swim-input"
-            >
-              {availableDistances.map((dist) => (
-                <option key={dist} value={dist}>{dist}</option>
-              ))}
-            </select>
+            <Select value={distance.toString()} onValueChange={(value) => setDistance(Number(value))}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select distance" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableDistances.map((dist) => (
+                  <SelectItem key={dist} value={dist.toString()}>{dist}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {errors.distance && <p className="text-red-500 text-sm">{errors.distance}</p>}
           </div>
           
