@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, Settings, Dumbbell, Pool } from 'lucide-react';
+import { User, LogOut, Settings, Dumbbell, Waves } from 'lucide-react';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -66,7 +65,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                   className="cursor-pointer"
                   onClick={() => navigate('/log')}
                 >
-                  <Pool className="mr-2 h-4 w-4" />
+                  <Waves className="mr-2 h-4 w-4" />
                   <span>Log Swim Session</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
