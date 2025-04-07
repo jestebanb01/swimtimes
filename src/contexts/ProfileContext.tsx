@@ -87,7 +87,7 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
         return;
       }
 
-      const updates = {
+      const updates: Partial<ProfileRow> = {
         first_name: profileData.firstName,
         last_name: profileData.lastName,
         year_of_birth: profileData.yearOfBirth,
