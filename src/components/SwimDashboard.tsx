@@ -21,7 +21,8 @@ const SwimDashboard: React.FC = () => {
     freestyle: 0,
     breaststroke: 0,
     butterfly: 0,
-    backstroke: 0
+    backstroke: 0,
+    medley: 0  // Added medley style
   };
   
   sessions.forEach(session => {
@@ -116,7 +117,7 @@ const SwimDashboard: React.FC = () => {
       <div className="mt-8">
         <h3 className="text-xl font-semibold mb-4">Best Times (100m pace)</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {(['freestyle', 'breaststroke', 'butterfly', 'backstroke'] as SwimStyle[]).map(style => (
+          {(['freestyle', 'breaststroke', 'butterfly', 'backstroke', 'medley'] as SwimStyle[]).map(style => (
             <Card key={style}>
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg capitalize">{style}</CardTitle>

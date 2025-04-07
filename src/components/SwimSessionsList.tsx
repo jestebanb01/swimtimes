@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useSwim } from '@/contexts/SwimContext';
 import { Button } from '@/components/ui/button';
@@ -43,7 +42,8 @@ const styleNames: Record<SwimStyle, string> = {
   freestyle: 'Freestyle',
   breaststroke: 'Breaststroke',
   butterfly: 'Butterfly',
-  backstroke: 'Backstroke'
+  backstroke: 'Backstroke',
+  medley: 'Medley'
 };
 
 const SwimSessionsList: React.FC = () => {
@@ -70,21 +70,18 @@ const SwimSessionsList: React.FC = () => {
   );
 
   const sortedSessions = [...filteredSessions].sort((a, b) => {
-    // Handle date sorting specially
     if (sortField === 'date') {
       return sortDirection === 'asc' 
         ? a.date.getTime() - b.date.getTime()
         : b.date.getTime() - a.date.getTime();
     }
     
-    // Handle other fields
     if (sortField === 'distance') {
       return sortDirection === 'asc'
         ? a.distance - b.distance
         : b.distance - a.distance;
     }
     
-    // Special case for time
     if (sortField === 'time') {
       const aSeconds = a.time.minutes * 60 + a.time.seconds + a.time.centiseconds / 100;
       const bSeconds = b.time.minutes * 60 + b.time.seconds + b.time.centiseconds / 100;
@@ -134,6 +131,9 @@ const SwimSessionsList: React.FC = () => {
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setFilterStyle('backstroke')}>
                 Backstroke
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFilterStyle('medley')}>
+                Medley
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
