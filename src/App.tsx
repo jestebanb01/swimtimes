@@ -8,6 +8,7 @@ import { SwimProvider } from "@/contexts/SwimContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProfileProvider } from "@/contexts/ProfileContext";
 import { TrainingProvider } from "@/contexts/TrainingContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import LogSession from "./pages/LogSession";
@@ -26,41 +27,43 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <ProfileProvider>
-            <SwimProvider>
-              <TrainingProvider>
-                <Routes>
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/" element={
-                    <ProtectedRoute>
-                      <Index />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/log" element={
-                    <ProtectedRoute>
-                      <LogSession />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/log-training" element={
-                    <ProtectedRoute>
-                      <LogTraining />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/history" element={
-                    <ProtectedRoute>
-                      <History />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/profile" element={
-                    <ProtectedRoute>
-                      <Profile />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </TrainingProvider>
-            </SwimProvider>
-          </ProfileProvider>
+          <LanguageProvider>
+            <ProfileProvider>
+              <SwimProvider>
+                <TrainingProvider>
+                  <Routes>
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/" element={
+                      <ProtectedRoute>
+                        <Index />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/log" element={
+                      <ProtectedRoute>
+                        <LogSession />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/log-training" element={
+                      <ProtectedRoute>
+                        <LogTraining />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/history" element={
+                      <ProtectedRoute>
+                        <History />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/profile" element={
+                      <ProtectedRoute>
+                        <Profile />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </TrainingProvider>
+              </SwimProvider>
+            </ProfileProvider>
+          </LanguageProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

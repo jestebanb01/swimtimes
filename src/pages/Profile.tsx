@@ -7,12 +7,16 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useProfile } from '@/contexts/ProfileContext';
 import { UserCircle, Upload } from 'lucide-react';
+import CountrySelector from '@/components/CountrySelector';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const Profile = () => {
   const { profile, updateProfile, uploadAvatar, loading } = useProfile();
+  const { t } = useLanguage();
   const [firstName, setFirstName] = useState(profile?.firstName || '');
   const [lastName, setLastName] = useState(profile?.lastName || '');
   const [yearOfBirth, setYearOfBirth] = useState<string>(profile?.yearOfBirth?.toString() || '');
+  const [country, setCountry] = useState<string | null>(profile?.country || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -43,7 +47,8 @@ const Profile = () => {
       await updateProfile({
         firstName: firstName || null,
         lastName: lastName || null,
-        yearOfBirth: yearOfBirth ? parseInt(yearOfBirth) : null
+        yearOfBirth: yearOfBirth ? parseInt(yearOfBirth) : null,
+        country: country
       });
     } finally {
       setIsSubmitting(false);
@@ -99,8 +104,8 @@ const Profile = () => {
       <div className="max-w-2xl mx-auto">
         <Card>
           <CardHeader>
-            <CardTitle>Profile Settings</CardTitle>
-            <CardDescription>Manage your account information</CardDescription>
+            <CardTitle>{t('profileSettings')}</CardTitle>
+            <CardDescription>{t('manageAccount')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col items-center mb-6">
@@ -129,32 +134,32 @@ const Profile = () => {
                 accept="image/*"
               />
               {errors.avatar && <p className="text-red-500 text-sm mt-1">{errors.avatar}</p>}
-              <p className="text-sm text-muted-foreground mt-2">Click to upload a new avatar</p>
+              <p className="text-sm text-muted-foreground mt-2">{t('uploadAvatar')}</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <label htmlFor="firstName" className="block text-sm font-medium">First Name</label>
+                <label htmlFor="firstName" className="block text-sm font-medium">{t('firstName')}</label>
                 <Input
                   id="firstName"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="Your first name"
+                  placeholder={t('firstName')}
                 />
               </div>
               
               <div className="space-y-2">
-                <label htmlFor="lastName" className="block text-sm font-medium">Last Name</label>
+                <label htmlFor="lastName" className="block text-sm font-medium">{t('lastName')}</label>
                 <Input
                   id="lastName"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  placeholder="Your last name"
+                  placeholder={t('lastName')}
                 />
               </div>
               
               <div className="space-y-2">
-                <label htmlFor="yearOfBirth" className="block text-sm font-medium">Year of Birth</label>
+                <label htmlFor="yearOfBirth" className="block text-sm font-medium">{t('yearOfBirth')}</label>
                 <Input
                   id="yearOfBirth"
                   value={yearOfBirth}
@@ -167,13 +172,22 @@ const Profile = () => {
                 {errors.yearOfBirth && <p className="text-red-500 text-sm">{errors.yearOfBirth}</p>}
               </div>
               
+              <div className="space-y-2">
+                <label htmlFor="country" className="block text-sm font-medium">{t('country')}</label>
+                <CountrySelector
+                  value={country}
+                  onChange={setCountry}
+                  className="w-full"
+                />
+              </div>
+              
               <CardFooter className="px-0 pt-4">
                 <Button 
                   type="submit" 
                   className="w-full bg-aqua-600 text-white hover:bg-aqua-700"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Saving..." : "Save Profile"}
+                  {isSubmitting ? t('saving') : t('saveProfile')}
                 </Button>
               </CardFooter>
             </form>

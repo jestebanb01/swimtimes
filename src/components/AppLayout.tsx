@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User, LogOut, Settings, Dumbbell, Waves } from 'lucide-react';
+import LanguageSelector from '@/components/LanguageSelector';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -18,6 +21,7 @@ interface AppLayoutProps {
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -29,20 +33,22 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           
           <nav className="hidden md:flex space-x-4">
             <Link to="/" className="text-gray-600 hover:text-gray-900">
-              Dashboard
+              {t('dashboard')}
             </Link>
             <Link to="/log" className="text-gray-600 hover:text-gray-900">
-              Log Session
+              {t('logSession')}
             </Link>
             <Link to="/log-training" className="text-gray-600 hover:text-gray-900">
-              Log Training
+              {t('logTraining')}
             </Link>
             <Link to="/history" className="text-gray-600 hover:text-gray-900">
-              History
+              {t('history')}
             </Link>
           </nav>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <LanguageSelector />
+            
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -59,21 +65,21 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                   onClick={() => navigate('/profile')}
                 >
                   <Settings className="mr-2 h-4 w-4" />
-                  <span>Profile Settings</span>
+                  <span>{t('profile')}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="cursor-pointer"
                   onClick={() => navigate('/log')}
                 >
                   <Waves className="mr-2 h-4 w-4" />
-                  <span>Log Swim Session</span>
+                  <span>{t('logSession')}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="cursor-pointer"
                   onClick={() => navigate('/log-training')}
                 >
                   <Dumbbell className="mr-2 h-4 w-4" />
-                  <span>Log Training</span>
+                  <span>{t('logTraining')}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
@@ -81,7 +87,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                   onClick={() => signOut()}
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
+                  <span>{t('logOut')}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -91,16 +97,16 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         <div className="md:hidden container mx-auto px-4 py-2 border-t border-gray-100">
           <div className="flex justify-between space-x-4 text-sm">
             <Link to="/" className="text-gray-600 hover:text-gray-900 flex-1 text-center py-1">
-              Dashboard
+              {t('dashboard')}
             </Link>
             <Link to="/log" className="text-gray-600 hover:text-gray-900 flex-1 text-center py-1">
-              Log Session
+              {t('logSession')}
             </Link>
             <Link to="/log-training" className="text-gray-600 hover:text-gray-900 flex-1 text-center py-1">
-              Log Training
+              {t('logTraining')}
             </Link>
             <Link to="/history" className="text-gray-600 hover:text-gray-900 flex-1 text-center py-1">
-              History
+              {t('history')}
             </Link>
           </div>
         </div>
@@ -112,7 +118,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       
       <footer className="bg-white border-t border-gray-200 mt-auto">
         <div className="container mx-auto px-4 py-6 text-center text-gray-500 text-sm">
-          &copy; {new Date().getFullYear()} SwimTracker. All rights reserved.
+          &copy; {new Date().getFullYear()} SwimTracker. {t('footer')}.
         </div>
       </footer>
     </div>

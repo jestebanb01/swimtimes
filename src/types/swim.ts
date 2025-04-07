@@ -1,4 +1,3 @@
-
 export type SwimStyle = 'freestyle' | 'breaststroke' | 'butterfly' | 'backstroke' | 'medley';
 export type PoolLength = '25m' | '50m';
 export type ChronoType = 'manual' | 'electronic';
@@ -38,4 +37,5 @@ export interface UserProfile {
   lastName: string | null;
   yearOfBirth: number | null;
   avatarUrl: string | null;
+  country: string | null;
 }

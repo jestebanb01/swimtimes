@@ -61,7 +61,8 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
           firstName: data.first_name,
           lastName: data.last_name,
           yearOfBirth: data.year_of_birth,
-          avatarUrl: data.avatar_url
+          avatarUrl: data.avatar_url,
+          country: data.country
         });
       }
     } catch (error: any) {
@@ -91,7 +92,8 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
         first_name: profileData.firstName,
         last_name: profileData.lastName,
         year_of_birth: profileData.yearOfBirth,
-        avatar_url: profileData.avatarUrl
+        avatar_url: profileData.avatarUrl,
+        country: profileData.country
       };
 
       const { error } = await supabase
