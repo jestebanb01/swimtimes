@@ -1,3 +1,4 @@
+
 export type SwimStyle = 'freestyle' | 'breaststroke' | 'butterfly' | 'backstroke' | 'medley';
 export type PoolLength = '25m' | '50m';
 export type ChronoType = 'manual' | 'electronic';
