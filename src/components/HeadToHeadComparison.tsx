@@ -30,7 +30,8 @@ import { SwimStyle, SwimTime, BestTimeComparison } from '@/types/swim';
 const HeadToHeadComparison: React.FC = () => {
   const { sessions } = useSwim();
   const { toast } = useToast();
-  const [opponentEmail, setOpponentEmail] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [comparisons, setComparisons] = useState<BestTimeComparison[]>([]);
   const [opponentName, setOpponentName] = useState<string | null>(null);
@@ -44,10 +45,10 @@ const HeadToHeadComparison: React.FC = () => {
   const tabDistances = ['all', ...commonDistances.filter(d => uniqueDistances.includes(d)).map(d => d.toString())];
 
   const findOpponentBestTimes = async () => {
-    if (!opponentEmail.trim()) {
+    if (!firstName.trim() && !lastName.trim()) {
       toast({
-        title: "Email required",
-        description: "Please enter an email to compare with",
+        title: "Name required",
+        description: "Please enter at least a first name or last name to compare with",
         variant: "destructive",
       });
       return;
@@ -55,19 +56,32 @@ const HeadToHeadComparison: React.FC = () => {
 
     setIsSearching(true);
     try {
-      // First get the opponent's user ID from their email
-      const { data: users, error: userError } = await supabase
+      // First get the opponent's user ID from their name
+      let query = supabase
         .from('profiles')
-        .select('id, first_name, last_name')
-        .eq('username', opponentEmail.trim())
-        .limit(1);
+        .select('id, first_name, last_name');
+      
+      if (firstName.trim() && lastName.trim()) {
+        // If both first and last name are provided
+        query = query
+          .eq('first_name', firstName.trim())
+          .eq('last_name', lastName.trim());
+      } else if (firstName.trim()) {
+        // If only first name is provided
+        query = query.eq('first_name', firstName.trim());
+      } else {
+        // If only last name is provided
+        query = query.eq('last_name', lastName.trim());
+      }
+
+      const { data: users, error: userError } = await query.limit(1);
 
       if (userError) throw userError;
       
       if (!users || users.length === 0) {
         toast({
           title: "User not found",
-          description: "No user found with that email address",
+          description: "No user found with that name",
           variant: "destructive",
         });
         setIsSearching(false);
@@ -77,7 +91,7 @@ const HeadToHeadComparison: React.FC = () => {
       const opponentId = users[0].id;
       const displayName = users[0].first_name && users[0].last_name
         ? `${users[0].first_name} ${users[0].last_name}`
-        : opponentEmail;
+        : (users[0].first_name || users[0].last_name);
       setOpponentName(displayName);
 
       // Get the opponent's swim sessions
@@ -240,17 +254,24 @@ const HeadToHeadComparison: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1">
               <Input
-                type="email"
-                placeholder="Enter opponent's email"
-                value={opponentEmail}
-                onChange={(e) => setOpponentEmail(e.target.value)}
+                type="text"
+                placeholder="First Name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="w-full mb-3"
+              />
+              <Input
+                type="text"
+                placeholder="Last Name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
                 className="w-full"
               />
             </div>
             <Button 
               onClick={findOpponentBestTimes} 
               disabled={isSearching}
-              className="bg-aqua-600 hover:bg-aqua-700"
+              className="bg-aqua-600 hover:bg-aqua-700 self-end"
             >
               {isSearching ? (
                 <div className="flex items-center">
@@ -361,7 +382,7 @@ const HeadToHeadComparison: React.FC = () => {
           {comparisons.length === 0 && !isSearching && (
             <div className="text-center py-8 text-gray-500 mt-4">
               <Users className="h-10 w-10 mx-auto mb-2" />
-              <p>Enter an opponent's email and click "Compare Times" to see how your swim times compare.</p>
+              <p>Enter an opponent's first and last name and click "Compare Times" to see how your swim times compare.</p>
             </div>
           )}
         </CardContent>

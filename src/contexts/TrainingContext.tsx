@@ -4,7 +4,6 @@ import { TrainingSession, TrainingIntensity } from '@/types/swim';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Database } from '@/integrations/supabase/types';
 import { v4 as uuidv4 } from 'uuid';
 
 interface TrainingContextType {
@@ -31,45 +30,92 @@ export const TrainingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // Load initial data - In a real app, this would fetch from Supabase
+  // Fetch training sessions from Supabase
   useEffect(() => {
-    const localData = localStorage.getItem('trainingSessions');
-    if (localData) {
-      try {
-        const parsed = JSON.parse(localData);
-        const sessions: TrainingSession[] = parsed.map((session: any) => ({
-          ...session,
-          date: new Date(session.date)
-        }));
-        setTrainingSessions(sessions);
-      } catch (error) {
-        console.error('Error parsing training sessions from localStorage', error);
+    const fetchTrainingSessions = async () => {
+      if (!user) {
+        setTrainingSessions([]);
+        setLoading(false);
+        return;
       }
-    }
-    setLoading(false);
-  }, []);
 
-  // Save to localStorage when sessions change
-  useEffect(() => {
-    if (trainingSessions.length > 0) {
-      localStorage.setItem('trainingSessions', JSON.stringify(trainingSessions));
-    }
-  }, [trainingSessions]);
+      try {
+        const { data, error } = await supabase
+          .from('training_sessions')
+          .select('*')
+          .order('date', { ascending: false });
+
+        if (error) throw error;
+
+        if (data) {
+          const formattedSessions: TrainingSession[] = data.map(session => ({
+            id: session.id,
+            date: new Date(session.date),
+            intensity: session.intensity as TrainingIntensity,
+            distance: session.distance,
+            description: session.description || ''
+          }));
+          
+          setTrainingSessions(formattedSessions);
+        }
+      } catch (error: any) {
+        console.error('Error fetching training sessions:', error.message);
+        toast({
+          title: "Failed to load training sessions",
+          description: error.message,
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrainingSessions();
+  }, [user, toast]);
 
   const addTrainingSession = async (sessionData: Omit<TrainingSession, 'id'>) => {
-    try {
-      const newSession: TrainingSession = {
-        id: uuidv4(),
-        ...sessionData
-      };
-
-      setTrainingSessions(prev => [newSession, ...prev]);
-      
+    if (!user) {
       toast({
-        title: "Training session added",
-        description: "Your training session has been recorded successfully.",
+        title: "Authentication required",
+        description: "You must be logged in to add training sessions.",
+        variant: "destructive",
       });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('training_sessions')
+        .insert({
+          user_id: user.id,
+          date: sessionData.date.toISOString(),
+          intensity: sessionData.intensity,
+          distance: sessionData.distance,
+          description: sessionData.description || null
+        })
+        .select('*')
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        const newSession: TrainingSession = {
+          id: data.id,
+          date: new Date(data.date),
+          intensity: data.intensity as TrainingIntensity,
+          distance: data.distance,
+          description: data.description || ''
+        };
+
+        setTrainingSessions(prev => [newSession, ...prev]);
+        
+        toast({
+          title: "Training session added",
+          description: "Your training session has been recorded successfully.",
+        });
+      }
     } catch (error: any) {
+      console.error('Error adding training session:', error);
       toast({
         title: "Error adding training session",
         description: error.message,
@@ -79,7 +125,28 @@ export const TrainingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const updateTrainingSession = async (session: TrainingSession) => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "You must be logged in to update training sessions.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
+      const { error } = await supabase
+        .from('training_sessions')
+        .update({
+          date: session.date.toISOString(),
+          intensity: session.intensity,
+          distance: session.distance,
+          description: session.description || null
+        })
+        .eq('id', session.id);
+
+      if (error) throw error;
+
       setTrainingSessions(prev => 
         prev.map(item => item.id === session.id ? session : item)
       );
@@ -89,6 +156,7 @@ export const TrainingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         description: "Your training session has been updated successfully.",
       });
     } catch (error: any) {
+      console.error('Error updating training session:', error);
       toast({
         title: "Error updating training session",
         description: error.message,
@@ -98,7 +166,23 @@ export const TrainingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const deleteTrainingSession = async (id: string) => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "You must be logged in to delete training sessions.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
+      const { error } = await supabase
+        .from('training_sessions')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
       setTrainingSessions(prev => prev.filter(session => session.id !== id));
       
       toast({
@@ -106,6 +190,7 @@ export const TrainingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         description: "The training session has been removed.",
       });
     } catch (error: any) {
+      console.error('Error deleting training session:', error);
       toast({
         title: "Error deleting training session",
         description: error.message,
