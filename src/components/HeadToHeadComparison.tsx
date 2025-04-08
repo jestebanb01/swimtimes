@@ -64,17 +64,17 @@ const HeadToHeadComparison: React.FC = () => {
       if (firstName.trim() && lastName.trim()) {
         // If both first and last name are provided
         query = query
-          .eq('first_name', firstName.trim())
-          .eq('last_name', lastName.trim());
+          .ilike('first_name', `%${firstName.trim()}%`)
+          .ilike('last_name', `%${lastName.trim()}%`);
       } else if (firstName.trim()) {
         // If only first name is provided
-        query = query.eq('first_name', firstName.trim());
+        query = query.ilike('first_name', `%${firstName.trim()}%`);
       } else {
         // If only last name is provided
-        query = query.eq('last_name', lastName.trim());
+        query = query.ilike('last_name', `%${lastName.trim()}%`);
       }
 
-      const { data: users, error: userError } = await query.limit(1);
+      const { data: users, error: userError } = await query;
 
       if (userError) throw userError;
       
@@ -88,6 +88,7 @@ const HeadToHeadComparison: React.FC = () => {
         return;
       }
 
+      console.log("Found users:", users);
       const opponentId = users[0].id;
       const displayName = users[0].first_name && users[0].last_name
         ? `${users[0].first_name} ${users[0].last_name}`
@@ -102,6 +103,8 @@ const HeadToHeadComparison: React.FC = () => {
 
       if (sessionsError) throw sessionsError;
 
+      console.log("Opponent sessions:", opponentSessions);
+      
       if (!opponentSessions || opponentSessions.length === 0) {
         toast({
           title: "No swim data",
@@ -193,6 +196,7 @@ const HeadToHeadComparison: React.FC = () => {
         description: `Showing comparison with ${displayName}`,
       });
     } catch (error: any) {
+      console.error("Error in comparison:", error);
       toast({
         title: "Error finding opponent",
         description: error.message,
