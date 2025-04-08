@@ -40,10 +40,14 @@ export const TrainingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
 
       try {
+        // Use generic query with proper type casting to handle the table not being in TypeScript definitions
         const { data, error } = await supabase
           .from('training_sessions')
           .select('*')
-          .order('date', { ascending: false });
+          .order('date', { ascending: false }) as unknown as { 
+            data: any[]; 
+            error: any;
+          };
 
         if (error) throw error;
 
@@ -84,6 +88,7 @@ export const TrainingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
 
     try {
+      // Use generic query with proper type casting
       const { data, error } = await supabase
         .from('training_sessions')
         .insert({
@@ -94,7 +99,10 @@ export const TrainingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           description: sessionData.description || null
         })
         .select('*')
-        .single();
+        .single() as unknown as {
+          data: any;
+          error: any;
+        };
 
       if (error) throw error;
 
@@ -135,6 +143,7 @@ export const TrainingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
 
     try {
+      // Use generic query with proper type casting
       const { error } = await supabase
         .from('training_sessions')
         .update({
@@ -143,7 +152,9 @@ export const TrainingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           distance: session.distance,
           description: session.description || null
         })
-        .eq('id', session.id);
+        .eq('id', session.id) as unknown as {
+          error: any;
+        };
 
       if (error) throw error;
 
@@ -176,10 +187,13 @@ export const TrainingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
 
     try {
+      // Use generic query with proper type casting
       const { error } = await supabase
         .from('training_sessions')
         .delete()
-        .eq('id', id);
+        .eq('id', id) as unknown as {
+          error: any;
+        };
 
       if (error) throw error;
 
