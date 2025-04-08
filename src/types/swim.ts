@@ -40,3 +40,13 @@ export interface UserProfile {
   avatarUrl: string | null;
   country: string | null;
 }
+
+export interface BestTimeComparison {
+  distance: number;
+  style: SwimStyle;
+  yourTime: SwimTime | null;
+  yourDate: Date | null;
+  opponentTime: SwimTime | null;
+  opponentDate: Date | null;
+  timeDifference: number; // in seconds, positive means your time is better
+}

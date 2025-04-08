@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import AppLayout from '@/components/AppLayout';
 import SwimSessionsList from '@/components/SwimSessionsList';
 import TrainingSessionsList from '@/components/TrainingSessionsList';
+import HeadToHeadComparison from '@/components/HeadToHeadComparison';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -19,6 +20,7 @@ const History = () => {
           <TabsList className="mb-6">
             <TabsTrigger value="swim">{t('swimSessions')}</TabsTrigger>
             <TabsTrigger value="training">{t('trainingSessions')}</TabsTrigger>
+            <TabsTrigger value="headtohead">Head to Head</TabsTrigger>
           </TabsList>
           
           <TabsContent value="swim" className="mt-0">
@@ -27,6 +29,10 @@ const History = () => {
           
           <TabsContent value="training" className="mt-0">
             <TrainingSessionsList />
+          </TabsContent>
+          
+          <TabsContent value="headtohead" className="mt-0">
+            <HeadToHeadComparison />
           </TabsContent>
         </Tabs>
       </div>
