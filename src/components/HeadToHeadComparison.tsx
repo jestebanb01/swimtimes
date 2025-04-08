@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useSwim } from '@/contexts/SwimContext';
 import { formatSwimTime, timeToTotalSeconds } from '@/utils/timeUtils';
@@ -95,15 +94,57 @@ const HeadToHeadComparison: React.FC = () => {
         : (users[0].first_name || users[0].last_name);
       setOpponentName(displayName);
 
-      // Get the opponent's swim sessions
+      // Get the opponent's swim sessions - use RPC function to bypass RLS
       const { data: opponentSessions, error: sessionsError } = await supabase
-        .from('swim_sessions')
-        .select('*')
-        .eq('user_id', opponentId);
+        .rpc('get_user_swim_sessions', {
+          p_user_id: opponentId
+        });
 
-      if (sessionsError) throw sessionsError;
+      if (sessionsError) {
+        console.error("RPC Error:", sessionsError);
+        // Fallback to direct query with type assertion
+        const { data: directSessions, error: directError } = await supabase
+          .from('swim_sessions')
+          .select('*')
+          .eq('user_id', opponentId);
+          
+        if (directError) throw directError;
+        
+        if (!directSessions || directSessions.length === 0) {
+          toast({
+            title: "No swim data",
+            description: "This user has no swim sessions recorded",
+            variant: "destructive",
+          });
+          setIsSearching(false);
+          return;
+        }
+        
+        console.log("Opponent sessions retrieved directly:", directSessions);
+        
+        // Format opponent sessions to match our format
+        const formattedOpponentSessions = directSessions.map(session => ({
+          id: session.id,
+          date: new Date(session.date),
+          style: session.style as SwimStyle,
+          distance: session.distance,
+          time: {
+            minutes: session.minutes,
+            seconds: session.seconds,
+            centiseconds: session.centiseconds,
+          },
+          location: session.location,
+          description: session.description || '',
+          poolLength: session.pool_length,
+          chronoType: session.chrono_type,
+          sessionType: session.session_type,
+        }));
+        
+        createComparisons(formattedOpponentSessions, displayName);
+        return;
+      }
 
-      console.log("Opponent sessions:", opponentSessions);
+      console.log("Opponent sessions from RPC:", opponentSessions);
       
       if (!opponentSessions || opponentSessions.length === 0) {
         toast({
@@ -133,68 +174,7 @@ const HeadToHeadComparison: React.FC = () => {
         sessionType: session.session_type,
       }));
 
-      // Create comparisons
-      const newComparisons: BestTimeComparison[] = [];
-      
-      // Get all unique distance-style combinations from both users
-      const yourDistanceStyles = new Set(sessions.map(s => `${s.distance}-${s.style}`));
-      const opponentDistanceStyles = new Set(formattedOpponentSessions.map(s => `${s.distance}-${s.style}`));
-      const allDistanceStyles = new Set([...yourDistanceStyles, ...opponentDistanceStyles]);
-      
-      allDistanceStyles.forEach(distanceStyle => {
-        const [distanceStr, style] = distanceStyle.split('-');
-        const distance = parseInt(distanceStr);
-        
-        // Find your best time for this distance-style
-        let yourBestSession = sessions
-          .filter(s => s.distance === distance && s.style === style)
-          .sort((a, b) => {
-            const aTime = timeToTotalSeconds(a.time);
-            const bTime = timeToTotalSeconds(b.time);
-            return aTime - bTime;
-          })[0];
-        
-        // Find opponent's best time for this distance-style
-        let opponentBestSession = formattedOpponentSessions
-          .filter(s => s.distance === distance && s.style === style)
-          .sort((a, b) => {
-            const aTime = timeToTotalSeconds(a.time);
-            const bTime = timeToTotalSeconds(b.time);
-            return aTime - bTime;
-          })[0];
-        
-        let timeDifference = 0;
-        if (yourBestSession && opponentBestSession) {
-          const yourTime = timeToTotalSeconds(yourBestSession.time);
-          const opponentTime = timeToTotalSeconds(opponentBestSession.time);
-          timeDifference = opponentTime - yourTime; // Positive means your time is better
-        }
-        
-        newComparisons.push({
-          distance,
-          style: style as SwimStyle,
-          yourTime: yourBestSession?.time || null,
-          yourDate: yourBestSession?.date || null,
-          opponentTime: opponentBestSession?.time || null,
-          opponentDate: opponentBestSession?.date || null,
-          timeDifference
-        });
-      });
-      
-      // Sort by distance and then by style
-      newComparisons.sort((a, b) => {
-        if (a.distance !== b.distance) {
-          return a.distance - b.distance;
-        }
-        return a.style.localeCompare(b.style);
-      });
-      
-      setComparisons(newComparisons);
-      
-      toast({
-        title: "Comparison ready",
-        description: `Showing comparison with ${displayName}`,
-      });
+      createComparisons(formattedOpponentSessions, displayName);
     } catch (error: any) {
       console.error("Error in comparison:", error);
       toast({
@@ -202,9 +182,75 @@ const HeadToHeadComparison: React.FC = () => {
         description: error.message,
         variant: "destructive",
       });
-    } finally {
       setIsSearching(false);
     }
+  };
+
+  const createComparisons = (formattedOpponentSessions: any[], displayName: string) => {
+    // Create comparisons
+    const newComparisons: BestTimeComparison[] = [];
+    
+    // Get all unique distance-style combinations from both users
+    const yourDistanceStyles = new Set(sessions.map(s => `${s.distance}-${s.style}`));
+    const opponentDistanceStyles = new Set(formattedOpponentSessions.map(s => `${s.distance}-${s.style}`));
+    const allDistanceStyles = new Set([...yourDistanceStyles, ...opponentDistanceStyles]);
+    
+    allDistanceStyles.forEach(distanceStyle => {
+      const [distanceStr, style] = distanceStyle.split('-');
+      const distance = parseInt(distanceStr);
+      
+      // Find your best time for this distance-style
+      let yourBestSession = sessions
+        .filter(s => s.distance === distance && s.style === style)
+        .sort((a, b) => {
+          const aTime = timeToTotalSeconds(a.time);
+          const bTime = timeToTotalSeconds(b.time);
+          return aTime - bTime;
+        })[0];
+      
+      // Find opponent's best time for this distance-style
+      let opponentBestSession = formattedOpponentSessions
+        .filter(s => s.distance === distance && s.style === style)
+        .sort((a, b) => {
+          const aTime = timeToTotalSeconds(a.time);
+          const bTime = timeToTotalSeconds(b.time);
+          return aTime - bTime;
+        })[0];
+      
+      let timeDifference = 0;
+      if (yourBestSession && opponentBestSession) {
+        const yourTime = timeToTotalSeconds(yourBestSession.time);
+        const opponentTime = timeToTotalSeconds(opponentBestSession.time);
+        timeDifference = opponentTime - yourTime; // Positive means your time is better
+      }
+      
+      newComparisons.push({
+        distance,
+        style: style as SwimStyle,
+        yourTime: yourBestSession?.time || null,
+        yourDate: yourBestSession?.date || null,
+        opponentTime: opponentBestSession?.time || null,
+        opponentDate: opponentBestSession?.date || null,
+        timeDifference
+      });
+    });
+    
+    // Sort by distance and then by style
+    newComparisons.sort((a, b) => {
+      if (a.distance !== b.distance) {
+        return a.distance - b.distance;
+      }
+      return a.style.localeCompare(b.style);
+    });
+    
+    setComparisons(newComparisons);
+    
+    toast({
+      title: "Comparison ready",
+      description: `Showing comparison with ${displayName}`,
+    });
+    
+    setIsSearching(false);
   };
 
   const getComparisonMessage = (timeDiff: number): { icon: React.ReactNode, message: string, class: string } => {
