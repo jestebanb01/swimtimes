@@ -17,6 +17,8 @@ import History from "./pages/History";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import Swimmers from "./pages/Swimmers";
+import SwimmerDetail from "./pages/SwimmerDetail";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +58,16 @@ const App = () => (
                     <Route path="/profile" element={
                       <ProtectedRoute>
                         <Profile />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/swimmers" element={
+                      <ProtectedRoute>
+                        <Swimmers />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/swimmers/:swimmerId" element={
+                      <ProtectedRoute>
+                        <SwimmerDetail />
                       </ProtectedRoute>
                     } />
                     <Route path="*" element={<NotFound />} />

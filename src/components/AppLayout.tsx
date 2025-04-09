@@ -3,6 +3,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/contexts/ProfileContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, Settings, Dumbbell, Waves } from 'lucide-react';
+import { User, LogOut, Settings, Dumbbell, Waves, Users } from 'lucide-react';
 import LanguageSelector from '@/components/LanguageSelector';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -20,8 +21,11 @@ interface AppLayoutProps {
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { signOut, user } = useAuth();
+  const { profile } = useProfile();
   const navigate = useNavigate();
   const { t } = useLanguage();
+  
+  const isCoach = profile?.userType === 'coach';
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -44,6 +48,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             <Link to="/history" className="text-gray-600 hover:text-gray-900">
               {t('history')}
             </Link>
+            {isCoach && (
+              <Link to="/swimmers" className="text-gray-600 hover:text-gray-900">
+                {t('mySwimmers')}
+              </Link>
+            )}
           </nav>
           
           <div className="flex items-center space-x-2">
@@ -81,6 +90,15 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                   <Dumbbell className="mr-2 h-4 w-4" />
                   <span>{t('logTraining')}</span>
                 </DropdownMenuItem>
+                {isCoach && (
+                  <DropdownMenuItem 
+                    className="cursor-pointer"
+                    onClick={() => navigate('/swimmers')}
+                  >
+                    <Users className="mr-2 h-4 w-4" />
+                    <span>{t('mySwimmers')}</span>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
                   className="cursor-pointer text-red-500 focus:text-red-500"
@@ -108,6 +126,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             <Link to="/history" className="text-gray-600 hover:text-gray-900 flex-1 text-center py-1">
               {t('history')}
             </Link>
+            {isCoach && (
+              <Link to="/swimmers" className="text-gray-600 hover:text-gray-900 flex-1 text-center py-1">
+                {t('mySwimmers')}
+              </Link>
+            )}
           </div>
         </div>
       </header>
