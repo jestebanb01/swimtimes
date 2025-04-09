@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useSwim } from '@/contexts/SwimContext';
 import { formatSwimTime, timeToTotalSeconds } from '@/utils/timeUtils';
@@ -16,6 +17,7 @@ import {
 import { format } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   Trophy, 
   TrendingDown, 
@@ -24,7 +26,10 @@ import {
   Search, 
   AlertCircle 
 } from 'lucide-react';
-import { SwimStyle, SwimTime, BestTimeComparison } from '@/types/swim';
+import { SwimStyle, SwimTime, BestTimeComparison, SwimSession } from '@/types/swim';
+import { Database } from '@/integrations/supabase/types';
+
+type SwimSessionRow = Database['public']['Tables']['swim_sessions']['Row'];
 
 const HeadToHeadComparison: React.FC = () => {
   const { sessions } = useSwim();
@@ -94,11 +99,11 @@ const HeadToHeadComparison: React.FC = () => {
         : (users[0].first_name || users[0].last_name);
       setOpponentName(displayName);
 
-      // Get the opponent's swim sessions - use RPC function to bypass RLS
+      // Get the opponent's swim sessions using RPC function
       const { data: opponentSessions, error: sessionsError } = await supabase
         .rpc('get_user_swim_sessions', {
           p_user_id: opponentId
-        });
+        }) as { data: SwimSessionRow[] | null, error: any };
 
       if (sessionsError) {
         console.error("RPC Error:", sessionsError);

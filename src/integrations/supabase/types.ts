@@ -128,7 +128,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_swim_sessions: {
+        Args: { p_user_id: string }
+        Returns: {
+          centiseconds: number
+          chrono_type: string
+          created_at: string
+          date: string
+          description: string | null
+          distance: number
+          id: string
+          location: string
+          minutes: number
+          pool_length: string
+          seconds: number
+          session_type: string
+          style: string
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
