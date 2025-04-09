@@ -4,6 +4,7 @@ export type PoolLength = '25m' | '50m';
 export type ChronoType = 'manual' | 'electronic';
 export type SessionType = 'pool' | 'open water';
 export type TrainingIntensity = 'Light' | 'Medium' | 'Hard';
+export type UserType = 'basic' | 'coach';
 
 export interface SwimTime {
   minutes: number;
@@ -32,6 +33,13 @@ export interface TrainingSession {
   description: string;
 }
 
+export interface Club {
+  id: string;
+  name: string;
+  country: string;
+  createdAt: Date;
+}
+
 export interface UserProfile {
   id: string;
   firstName: string | null;
@@ -39,6 +47,9 @@ export interface UserProfile {
   yearOfBirth: number | null;
   avatarUrl: string | null;
   country: string | null;
+  gender: string | null;
+  clubId: string | null;
+  userType: UserType;
 }
 
 export interface BestTimeComparison {

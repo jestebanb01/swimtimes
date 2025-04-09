@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { UserProfile } from '@/types/swim';
+import { UserProfile, UserType } from '@/types/swim';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -62,7 +62,10 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
           lastName: data.last_name,
           yearOfBirth: data.year_of_birth,
           avatarUrl: data.avatar_url,
-          country: data.country
+          country: data.country,
+          gender: data.gender,
+          clubId: data.club_id,
+          userType: data.user_type as UserType
         });
       }
     } catch (error: any) {
@@ -93,7 +96,10 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
         last_name: profileData.lastName,
         year_of_birth: profileData.yearOfBirth,
         avatar_url: profileData.avatarUrl,
-        country: profileData.country
+        country: profileData.country,
+        gender: profileData.gender,
+        club_id: profileData.clubId,
+        user_type: profileData.userType
       };
 
       const { error } = await supabase

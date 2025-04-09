@@ -9,38 +9,76 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      clubs: {
+        Row: {
+          country: string
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          country: string
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
+          club_id: string | null
           country: string | null
           created_at: string
           first_name: string | null
+          gender: string | null
           id: string
           last_name: string | null
+          user_type: Database["public"]["Enums"]["user_type"]
           username: string | null
           year_of_birth: number | null
         }
         Insert: {
           avatar_url?: string | null
+          club_id?: string | null
           country?: string | null
           created_at?: string
           first_name?: string | null
+          gender?: string | null
           id: string
           last_name?: string | null
+          user_type?: Database["public"]["Enums"]["user_type"]
           username?: string | null
           year_of_birth?: number | null
         }
         Update: {
           avatar_url?: string | null
+          club_id?: string | null
           country?: string | null
           created_at?: string
           first_name?: string | null
+          gender?: string | null
           id?: string
           last_name?: string | null
+          user_type?: Database["public"]["Enums"]["user_type"]
           username?: string | null
           year_of_birth?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       swim_sessions: {
         Row: {
@@ -149,7 +187,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      user_type: "basic" | "coach"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -264,6 +302,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_type: ["basic", "coach"],
+    },
   },
 } as const

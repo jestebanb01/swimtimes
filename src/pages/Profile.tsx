@@ -4,11 +4,26 @@ import AppLayout from '@/components/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from '@/components/ui/card';
+import { 
+  RadioGroup, 
+  RadioGroupItem 
+} from '@/components/ui/radio-group';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { Label } from '@/components/ui/label';
 import { useProfile } from '@/contexts/ProfileContext';
 import { UserCircle, Upload } from 'lucide-react';
 import CountrySelector from '@/components/CountrySelector';
+import ClubSelector from '@/components/ClubSelector';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { UserType } from '@/types/swim';
 
 const Profile = () => {
   const { profile, updateProfile, uploadAvatar, loading } = useProfile();
@@ -17,6 +32,9 @@ const Profile = () => {
   const [lastName, setLastName] = useState(profile?.lastName || '');
   const [yearOfBirth, setYearOfBirth] = useState<string>(profile?.yearOfBirth?.toString() || '');
   const [country, setCountry] = useState<string | null>(profile?.country || null);
+  const [gender, setGender] = useState<string | null>(profile?.gender || null);
+  const [clubId, setClubId] = useState<string | null>(profile?.clubId || null);
+  const [userType, setUserType] = useState<UserType>(profile?.userType || 'basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -48,7 +66,10 @@ const Profile = () => {
         firstName: firstName || null,
         lastName: lastName || null,
         yearOfBirth: yearOfBirth ? parseInt(yearOfBirth) : null,
-        country: country
+        country: country,
+        gender: gender,
+        clubId: clubId,
+        userType: userType
       });
     } finally {
       setIsSubmitting(false);
@@ -173,12 +194,57 @@ const Profile = () => {
               </div>
               
               <div className="space-y-2">
+                <label className="block text-sm font-medium">{t('gender') || 'Gender'}</label>
+                <RadioGroup
+                  value={gender || ''}
+                  onValueChange={(value) => setGender(value || null)}
+                  className="flex space-x-4"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="male" id="male" />
+                    <Label htmlFor="male">{t('male') || 'Male'}</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="female" id="female" />
+                    <Label htmlFor="female">{t('female') || 'Female'}</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="other" id="other" />
+                    <Label htmlFor="other">{t('other') || 'Other'}</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              
+              <div className="space-y-2">
                 <label htmlFor="country" className="block text-sm font-medium">{t('country')}</label>
                 <CountrySelector
                   value={country}
                   onChange={setCountry}
                   className="w-full"
                 />
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="club" className="block text-sm font-medium">{t('club') || 'Swimming Club'}</label>
+                <ClubSelector
+                  value={clubId}
+                  onChange={setClubId}
+                  className="w-full"
+                />
+              </div>
+              
+              {/* User type is read-only as it's managed by admins in the database */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">{t('userType') || 'User Type'}</label>
+                <div className="p-2 bg-gray-50 rounded border border-gray-200">
+                  {userType === 'coach' ? 
+                    (t('coach') || 'Coach') : 
+                    (t('basicUser') || 'Basic User')
+                  }
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {t('userTypeInfo') || 'User type can only be changed by administrators.'}
+                </p>
               </div>
               
               <CardFooter className="px-0 pt-4">
