@@ -76,7 +76,7 @@ const ClubSelector: React.FC<ClubSelectorProps> = ({
         <SelectValue placeholder={t('selectClub')} />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="">
+        <SelectItem value="none">
           {t('noClub')}
         </SelectItem>
         {clubs.map((club) => (
