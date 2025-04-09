@@ -31,25 +31,18 @@ export async function findUserByName(firstName: string, lastName: string) {
 }
 
 export async function getOpponentSessions(opponentId: string) {
-  // Try RPC function first
-  const { data: opponentSessions, error: sessionsError } = await supabase
-    .rpc('get_user_swim_sessions', {
-      p_user_id: opponentId
-    }) as { data: SwimSessionRow[] | null, error: any };
-
-  if (sessionsError) {
-    console.error("RPC Error:", sessionsError);
-    // Fallback to direct query with type assertion
-    const { data: directSessions, error: directError } = await supabase
-      .from('swim_sessions')
-      .select('*')
-      .eq('user_id', opponentId);
+  // Use direct query instead of RPC function to avoid permission issues
+  const { data: directSessions, error: directError } = await supabase
+    .from('swim_sessions')
+    .select('*')
+    .eq('user_id', opponentId);
       
-    if (directError) throw directError;
-    return directSessions || [];
+  if (directError) {
+    console.error("Query Error:", directError);
+    throw directError;
   }
 
-  return opponentSessions || [];
+  return directSessions || [];
 }
 
 export function formatSessionsForComparison(sessions: SwimSessionRow[]) {

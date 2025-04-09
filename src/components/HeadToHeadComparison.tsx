@@ -65,7 +65,7 @@ const HeadToHeadComparison: React.FC = () => {
         : (users[0].first_name || users[0].last_name);
       setOpponentName(displayName);
 
-      // Get opponent sessions
+      // Get opponent sessions - using direct query now instead of RPC
       const rawOpponentSessions = await getOpponentSessions(opponentId);
       
       if (!rawOpponentSessions || rawOpponentSessions.length === 0) {
@@ -78,6 +78,8 @@ const HeadToHeadComparison: React.FC = () => {
         return;
       }
 
+      console.log("Opponent sessions retrieved:", rawOpponentSessions.length);
+      
       // Format sessions for comparison
       const formattedOpponentSessions = formatSessionsForComparison(rawOpponentSessions);
       
