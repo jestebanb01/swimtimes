@@ -100,6 +100,7 @@ const HeadToHeadComparison: React.FC = () => {
       setOpponentName(displayName);
 
       // Get the opponent's swim sessions using RPC function
+      // Use type assertion to specify the response type
       const { data: opponentSessions, error: sessionsError } = await supabase
         .rpc('get_user_swim_sessions', {
           p_user_id: opponentId
