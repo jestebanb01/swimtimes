@@ -1,92 +1,82 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { SwimSession, TrainingSession, UserProfile } from '@/types/swim';
-import { formatSessionsForComparison } from '@/services/comparisonService';
+import { SwimSession, TrainingSession, UserProfile, SwimStyle, PoolLength, ChronoType, SessionType } from '@/types/swim';
 
-export async function fetchSwimmerProfile(swimmerId: string): Promise<UserProfile | null> {
-  try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', swimmerId)
-      .single();
-
-    if (error) throw error;
-
-    console.log("Fetched swimmer details:", data);
-
-    if (data) {
-      return {
-        id: data.id,
-        firstName: data.first_name,
-        lastName: data.last_name,
-        yearOfBirth: data.year_of_birth,
-        avatarUrl: data.avatar_url,
-        country: data.country,
-        gender: data.gender,
-        clubId: data.club_id,
-        userType: data.user_type
-      };
-    }
+export const fetchSwimmerProfile = async (swimmerId: string): Promise<UserProfile | null> => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', swimmerId)
+    .single();
+    
+  if (error || !data) {
+    console.error('Error fetching swimmer profile:', error);
     return null;
-  } catch (error) {
-    console.error("Error fetching swimmer details:", error);
-    throw error;
   }
-}
+  
+  return {
+    id: data.id,
+    firstName: data.first_name,
+    lastName: data.last_name,
+    yearOfBirth: data.year_of_birth,
+    avatarUrl: data.avatar_url,
+    country: data.country,
+    gender: data.gender,
+    clubId: data.club_id,
+    userType: data.user_type,
+  };
+};
 
-export async function fetchSwimmerSwimSessions(swimmerId: string): Promise<SwimSession[]> {
-  try {
-    console.log("Fetching swim sessions for swimmer ID:", swimmerId);
+export const fetchSwimmerSwimSessions = async (swimmerId: string): Promise<SwimSession[]> => {
+  const { data, error } = await supabase
+    .from('swim_sessions')
+    .select('*')
+    .eq('user_id', swimmerId)
+    .order('date', { ascending: false });
     
-    const { data, error } = await supabase
-      .from('swim_sessions')
-      .select('*')
-      .eq('user_id', swimmerId)
-      .order('date', { ascending: false });
-
-    if (error) throw error;
-
-    console.log("Fetched swim sessions:", data);
-
-    if (data) {
-      return formatSessionsForComparison(data);
-    }
+  if (error) {
+    console.error('Error fetching swimmer swim sessions:', error);
     return [];
-  } catch (error) {
-    console.error("Error fetching swim sessions:", error);
-    throw error;
   }
-}
+  
+  // Convert from database format to application format
+  const formattedSessions: SwimSession[] = (data || []).map(session => ({
+    id: session.id,
+    date: new Date(session.date),
+    style: session.style as SwimStyle,
+    distance: session.distance,
+    time: {
+      minutes: session.minutes,
+      seconds: session.seconds,
+      centiseconds: session.centiseconds,
+    },
+    location: session.location,
+    description: session.description || '',
+    poolLength: session.pool_length as PoolLength,
+    chronoType: (session.chrono_type || 'manual') as ChronoType,
+    sessionType: (session.session_type || 'pool') as SessionType
+  }));
+  
+  return formattedSessions;
+};
 
-export async function fetchSwimmerTrainingSessions(swimmerId: string): Promise<TrainingSession[]> {
-  try {
-    console.log("Fetching training sessions for swimmer ID:", swimmerId);
+export const fetchSwimmerTrainingSessions = async (swimmerId: string): Promise<TrainingSession[]> => {
+  const { data, error } = await supabase
+    .from('training_sessions')
+    .select('*')
+    .eq('user_id', swimmerId)
+    .order('date', { ascending: false });
     
-    const { data, error } = await supabase
-      .from('training_sessions')
-      .select('*')
-      .eq('user_id', swimmerId)
-      .order('date', { ascending: false });
-
-    if (error) throw error;
-
-    console.log("Fetched training sessions:", data);
-
-    if (data) {
-      const formattedTrainings: TrainingSession[] = data.map((training: any) => ({
-        id: training.id,
-        date: new Date(training.date),
-        intensity: training.intensity,
-        distance: training.distance,
-        description: training.description || ''
-      }));
-      
-      return formattedTrainings;
-    }
+  if (error) {
+    console.error('Error fetching swimmer training sessions:', error);
     return [];
-  } catch (error) {
-    console.error("Error fetching training sessions:", error);
-    throw error;
   }
-}
+  
+  return (data || []).map(session => ({
+    id: session.id,
+    date: new Date(session.date),
+    intensity: session.intensity,
+    distance: session.distance,
+    description: session.description || '',
+  }));
+};
