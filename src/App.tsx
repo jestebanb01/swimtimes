@@ -19,6 +19,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Swimmers from "./pages/Swimmers";
 import SwimmerDetail from "./pages/SwimmerDetail";
+import AllSessions from "./pages/AllSessions";
 
 const queryClient = new QueryClient();
 
@@ -68,6 +69,11 @@ const App = () => (
                     <Route path="/swimmers/:swimmerId" element={
                       <ProtectedRoute>
                         <SwimmerDetail />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/all-sessions" element={
+                      <ProtectedRoute>
+                        <AllSessions />
                       </ProtectedRoute>
                     } />
                     <Route path="*" element={<NotFound />} />

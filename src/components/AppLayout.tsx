@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, Settings, Dumbbell, Waves, Users } from 'lucide-react';
+import { User, LogOut, Settings, Dumbbell, Waves, Users, List } from 'lucide-react';
 import LanguageSelector from '@/components/LanguageSelector';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -49,9 +49,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               {t('history')}
             </Link>
             {isCoach && (
-              <Link to="/swimmers" className="text-gray-600 hover:text-gray-900">
-                {t('mySwimmers')}
-              </Link>
+              <>
+                <Link to="/swimmers" className="text-gray-600 hover:text-gray-900">
+                  {t('mySwimmers')}
+                </Link>
+                <Link to="/all-sessions" className="text-gray-600 hover:text-gray-900">
+                  {t('allSessions')}
+                </Link>
+              </>
             )}
           </nav>
           
@@ -91,13 +96,22 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                   <span>{t('logTraining')}</span>
                 </DropdownMenuItem>
                 {isCoach && (
-                  <DropdownMenuItem 
-                    className="cursor-pointer"
-                    onClick={() => navigate('/swimmers')}
-                  >
-                    <Users className="mr-2 h-4 w-4" />
-                    <span>{t('mySwimmers')}</span>
-                  </DropdownMenuItem>
+                  <>
+                    <DropdownMenuItem 
+                      className="cursor-pointer"
+                      onClick={() => navigate('/swimmers')}
+                    >
+                      <Users className="mr-2 h-4 w-4" />
+                      <span>{t('mySwimmers')}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className="cursor-pointer"
+                      onClick={() => navigate('/all-sessions')}
+                    >
+                      <List className="mr-2 h-4 w-4" />
+                      <span>{t('allSessions')}</span>
+                    </DropdownMenuItem>
+                  </>
                 )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
@@ -127,9 +141,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               {t('history')}
             </Link>
             {isCoach && (
-              <Link to="/swimmers" className="text-gray-600 hover:text-gray-900 flex-1 text-center py-1">
-                {t('mySwimmers')}
-              </Link>
+              <>
+                <Link to="/swimmers" className="text-gray-600 hover:text-gray-900 flex-1 text-center py-1">
+                  {t('mySwimmers')}
+                </Link>
+                <Link to="/all-sessions" className="text-gray-600 hover:text-gray-900 flex-1 text-center py-1">
+                  {t('allSessions')}
+                </Link>
+              </>
             )}
           </div>
         </div>
