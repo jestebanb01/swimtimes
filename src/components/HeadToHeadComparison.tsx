@@ -65,8 +65,10 @@ const HeadToHeadComparison: React.FC = () => {
         : (users[0].first_name || users[0].last_name);
       setOpponentName(displayName);
 
-      // Get opponent sessions - using direct query now instead of RPC
+      // Get opponent sessions
       const rawOpponentSessions = await getOpponentSessions(opponentId);
+      
+      console.log("Raw opponent sessions:", rawOpponentSessions);
       
       if (!rawOpponentSessions || rawOpponentSessions.length === 0) {
         toast({
@@ -83,8 +85,13 @@ const HeadToHeadComparison: React.FC = () => {
       // Format sessions for comparison
       const formattedOpponentSessions = formatSessionsForComparison(rawOpponentSessions);
       
+      console.log("Formatted opponent sessions:", formattedOpponentSessions);
+      console.log("Your sessions:", sessions);
+      
       // Create comparisons
       const newComparisons = createComparisons(sessions, formattedOpponentSessions);
+      console.log("Generated comparisons:", newComparisons);
+      
       setComparisons(newComparisons);
       
       toast({

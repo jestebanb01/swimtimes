@@ -31,7 +31,7 @@ export async function findUserByName(firstName: string, lastName: string) {
 }
 
 export async function getOpponentSessions(opponentId: string) {
-  // Use direct query instead of RPC function to avoid permission issues
+  // Use direct query to get another user's swim sessions
   const { data: directSessions, error: directError } = await supabase
     .from('swim_sessions')
     .select('*')

@@ -66,14 +66,18 @@ const Swimmers = () => {
 
       setLoading(true);
       
+      console.log("Coach's club ID:", profile.clubId);
+      
       // Fetch all users from the same club, excluding the current user
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('club_id', profile.clubId)
         .neq('id', profile.id);
 
       if (error) throw error;
+
+      console.log("Fetched swimmers:", data);
 
       if (data) {
         const formattedSwimmers: UserProfile[] = data.map((swimmer: any) => ({
@@ -91,6 +95,7 @@ const Swimmers = () => {
         setSwimmers(formattedSwimmers);
       }
     } catch (error: any) {
+      console.error("Error fetching swimmers:", error);
       toast({
         title: "Error fetching swimmers",
         description: error.message,

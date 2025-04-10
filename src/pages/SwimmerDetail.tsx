@@ -21,11 +21,12 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, User, Edit } from 'lucide-react';
+import { ArrowLeft, User } from 'lucide-react';
 import SwimSessionsList from '@/components/SwimSessionsList';
 import TrainingSessionsList from '@/components/TrainingSessionsList';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { formatSessionsForComparison } from '@/services/comparisonService';
 
 const SwimmerDetail = () => {
   const { swimmerId } = useParams<{ swimmerId: string }>();
@@ -52,22 +53,27 @@ const SwimmerDetail = () => {
       return;
     }
 
-    fetchSwimmerDetails();
-    fetchSwimmerSessions();
-    fetchSwimmerTrainings();
+    if (swimmerId) {
+      console.log("Fetching details for swimmer ID:", swimmerId);
+      fetchSwimmerDetails();
+      fetchSwimmerSessions();
+      fetchSwimmerTrainings();
+    }
   }, [profile, swimmerId, navigate]);
 
   const fetchSwimmerDetails = async () => {
     try {
       if (!swimmerId) return;
 
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', swimmerId)
         .single();
 
       if (error) throw error;
+
+      console.log("Fetched swimmer details:", data);
 
       if (data) {
         setSwimmer({
@@ -83,6 +89,7 @@ const SwimmerDetail = () => {
         });
       }
     } catch (error: any) {
+      console.error("Error fetching swimmer details:", error);
       toast({
         title: "Error fetching swimmer details",
         description: error.message,
@@ -95,7 +102,9 @@ const SwimmerDetail = () => {
     try {
       if (!swimmerId) return;
 
-      const { data, error } = await (supabase as any)
+      console.log("Fetching swim sessions for swimmer ID:", swimmerId);
+      
+      const { data, error } = await supabase
         .from('swim_sessions')
         .select('*')
         .eq('user_id', swimmerId)
@@ -103,27 +112,14 @@ const SwimmerDetail = () => {
 
       if (error) throw error;
 
+      console.log("Fetched swim sessions:", data);
+
       if (data) {
-        const formattedSessions: SwimSession[] = data.map((session: any) => ({
-          id: session.id,
-          date: new Date(session.date),
-          style: session.style,
-          distance: session.distance,
-          time: {
-            minutes: session.minutes,
-            seconds: session.seconds,
-            centiseconds: session.centiseconds
-          },
-          location: session.location,
-          description: session.description || '',
-          poolLength: session.pool_length,
-          chronoType: session.chrono_type,
-          sessionType: session.session_type
-        }));
-        
+        const formattedSessions = formatSessionsForComparison(data);
         setSwimSessions(formattedSessions);
       }
     } catch (error: any) {
+      console.error("Error fetching swim sessions:", error);
       toast({
         title: "Error fetching swim sessions",
         description: error.message,
@@ -138,13 +134,17 @@ const SwimmerDetail = () => {
     try {
       if (!swimmerId) return;
 
-      const { data, error } = await (supabase as any)
+      console.log("Fetching training sessions for swimmer ID:", swimmerId);
+      
+      const { data, error } = await supabase
         .from('training_sessions')
         .select('*')
         .eq('user_id', swimmerId)
         .order('date', { ascending: false });
 
       if (error) throw error;
+
+      console.log("Fetched training sessions:", data);
 
       if (data) {
         const formattedTrainings: TrainingSession[] = data.map((training: any) => ({
@@ -158,6 +158,7 @@ const SwimmerDetail = () => {
         setTrainingSessions(formattedTrainings);
       }
     } catch (error: any) {
+      console.error("Error fetching training sessions:", error);
       toast({
         title: "Error fetching training sessions",
         description: error.message,
