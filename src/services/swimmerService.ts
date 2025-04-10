@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { SwimSession, TrainingSession, UserProfile, SwimStyle, PoolLength, ChronoType, SessionType } from '@/types/swim';
+import { SwimSession, TrainingSession, UserProfile, SwimStyle, PoolLength, ChronoType, SessionType, TrainingIntensity } from '@/types/swim';
 
 export const fetchSwimmerProfile = async (swimmerId: string): Promise<UserProfile | null> => {
   const { data, error } = await supabase
@@ -75,7 +75,7 @@ export const fetchSwimmerTrainingSessions = async (swimmerId: string): Promise<T
   return (data || []).map(session => ({
     id: session.id,
     date: new Date(session.date),
-    intensity: session.intensity,
+    intensity: session.intensity as TrainingIntensity,
     distance: session.distance,
     description: session.description || '',
   }));
