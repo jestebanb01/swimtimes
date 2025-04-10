@@ -15,7 +15,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 import EditTrainingForm from './EditTrainingForm';
 import { TrainingSession, TrainingIntensity } from '@/types/swim';
 
