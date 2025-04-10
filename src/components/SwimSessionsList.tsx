@@ -54,12 +54,20 @@ const styleNames: Record<SwimStyle, string> = {
   medley: 'Medley'
 };
 
-const SwimSessionsList: React.FC = () => {
-  const { sessions, deleteSession, loading } = useSwim();
+interface SwimSessionsListProps {
+  sessions?: SwimSession[];
+  readOnly?: boolean;
+}
+
+const SwimSessionsList: React.FC<SwimSessionsListProps> = ({ sessions, readOnly = false }) => {
+  const { sessions: contextSessions, deleteSession, loading } = useSwim();
   const [sortField, setSortField] = useState<keyof SwimSession>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [filterStyle, setFilterStyle] = useState<SwimStyle | 'all'>('all');
   const [editingSession, setEditingSession] = useState<SwimSession | null>(null);
+
+  // Use provided sessions if available, otherwise use from context
+  const allSessions = sessions || contextSessions;
 
   const toggleSortDirection = () => {
     setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -75,14 +83,16 @@ const SwimSessionsList: React.FC = () => {
   };
 
   const handleEdit = (session: SwimSession) => {
-    setEditingSession(session);
+    if (!readOnly) {
+      setEditingSession(session);
+    }
   };
 
   const closeEditForm = () => {
     setEditingSession(null);
   };
 
-  const filteredSessions = sessions.filter(session => 
+  const filteredSessions = allSessions.filter(session => 
     filterStyle === 'all' || session.style === filterStyle
   );
 
@@ -110,7 +120,7 @@ const SwimSessionsList: React.FC = () => {
 
   const SortIcon = sortDirection === 'asc' ? ArrowUp : ArrowDown;
 
-  if (loading) {
+  if (loading && !sessions) {
     return (
       <div className="flex justify-center p-8">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-aqua-600"></div>
@@ -118,7 +128,7 @@ const SwimSessionsList: React.FC = () => {
     );
   }
 
-  if (sessions.length === 0) {
+  if (allSessions.length === 0) {
     return (
       <div className="text-center p-8">
         <p className="text-lg text-gray-600">No swim sessions recorded yet.</p>
@@ -132,58 +142,60 @@ const SwimSessionsList: React.FC = () => {
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
         <h2 className="text-2xl font-bold text-aqua-800">Your Swim Sessions</h2>
         
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-full sm:w-auto">
-                Filter by Style
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Swim Styles</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setFilterStyle('all')}>
-                All Styles
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterStyle('freestyle')}>
-                Freestyle
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterStyle('breaststroke')}>
-                Breaststroke
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterStyle('butterfly')}>
-                Butterfly
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterStyle('backstroke')}>
-                Backstroke
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterStyle('medley')}>
-                Medley
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-full sm:w-auto">
-                Sort by
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Sort Options</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleSort('date')}>
-                Date {sortField === 'date' && <SortIcon className="ml-2 h-4 w-4" />}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleSort('distance')}>
-                Distance {sortField === 'distance' && <SortIcon className="ml-2 h-4 w-4" />}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleSort('time')}>
-                Time {sortField === 'time' && <SortIcon className="ml-2 h-4 w-4" />}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        {!readOnly && (
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full sm:w-auto">
+                  Filter by Style
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Swim Styles</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setFilterStyle('all')}>
+                  All Styles
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilterStyle('freestyle')}>
+                  Freestyle
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilterStyle('breaststroke')}>
+                  Breaststroke
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilterStyle('butterfly')}>
+                  Butterfly
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilterStyle('backstroke')}>
+                  Backstroke
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilterStyle('medley')}>
+                  Medley
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full sm:w-auto">
+                  Sort by
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Sort Options</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleSort('date')}>
+                  Date {sortField === 'date' && <SortIcon className="ml-2 h-4 w-4" />}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleSort('distance')}>
+                  Distance {sortField === 'distance' && <SortIcon className="ml-2 h-4 w-4" />}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleSort('time')}>
+                  Time {sortField === 'time' && <SortIcon className="ml-2 h-4 w-4" />}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -204,46 +216,48 @@ const SwimSessionsList: React.FC = () => {
                   <div className="bg-aqua-100 text-aqua-800 px-3 py-1 rounded-full text-sm font-medium mr-2">
                     {session.distance}m
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleEdit(session)}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-red-600">
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <div className="flex items-center w-full">
-                              <Trash className="mr-2 h-4 w-4" />
-                              Delete
-                            </div>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This will permanently delete this swim session record.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => deleteSession(session.id)}
-                                className="bg-red-500 hover:bg-red-600"
-                              >
+                  {!readOnly && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEdit(session)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600">
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <div className="flex items-center w-full">
+                                <Trash className="mr-2 h-4 w-4" />
                                 Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                              </div>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This will permanently delete this swim session record.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => deleteSession(session.id)}
+                                  className="bg-red-500 hover:bg-red-600"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                 </div>
               </div>
             </CardHeader>
@@ -280,7 +294,7 @@ const SwimSessionsList: React.FC = () => {
         ))}
       </div>
 
-      {editingSession && (
+      {!readOnly && editingSession && (
         <EditSessionForm 
           session={editingSession} 
           isOpen={!!editingSession} 
