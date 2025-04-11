@@ -68,7 +68,7 @@ const Swimmers = () => {
       
       console.log("Coach's club ID:", profile.clubId);
       
-      // Fetch all users from the same club, excluding the current user
+      // Fetch all users from the same club as the coach, excluding the coach
       const { data, error } = await supabase
         .from('profiles')
         .select('*')

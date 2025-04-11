@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { SwimSession, TrainingSession, UserProfile, SwimStyle, PoolLength, ChronoType, SessionType, TrainingIntensity } from '@/types/swim';
 
@@ -91,7 +92,7 @@ export interface SwimmerSession extends SwimSession {
 }
 
 export const fetchAllSwimmerSessions = async (): Promise<SwimmerSession[]> => {
-  // First fetch all swim sessions
+  // First fetch all swim sessions without any user filter
   const { data: sessionsData, error: sessionsError } = await supabase
     .from('swim_sessions')
     .select('*')

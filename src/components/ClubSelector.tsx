@@ -32,9 +32,7 @@ const ClubSelector: React.FC<ClubSelectorProps> = ({
     const fetchClubs = async () => {
       try {
         setLoading(true);
-        // Use any type to bypass the TypeScript restriction temporarily
-        // until the generated types are updated
-        const { data, error } = await (supabase as any)
+        const { data, error } = await supabase
           .from('clubs')
           .select('*')
           .order('name');
