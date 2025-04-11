@@ -1,10 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import AppLayout from '@/components/AppLayout';
 import { useToast } from '@/components/ui/use-toast';
 import { useProfile } from '@/contexts/ProfileContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/types/swim';
 import {
   Card,
@@ -31,6 +29,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, ChevronRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { fetchSwimmersInClub } from '@/services/profileService';
 
 const Swimmers = () => {
   const [swimmers, setSwimmers] = useState<UserProfile[]>([]);
@@ -59,41 +58,18 @@ const Swimmers = () => {
 
   const fetchSwimmers = async () => {
     try {
+      setLoading(true);
+      
       if (!profile?.clubId) {
         setLoading(false);
         return;
       }
-
-      setLoading(true);
       
       console.log("Coach's club ID:", profile.clubId);
       
-      // Fetch all users from the same club as the coach, excluding the coach
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('club_id', profile.clubId)
-        .neq('id', profile.id);
-
-      if (error) throw error;
-
-      console.log("Fetched swimmers:", data);
-
-      if (data) {
-        const formattedSwimmers: UserProfile[] = data.map((swimmer: any) => ({
-          id: swimmer.id,
-          firstName: swimmer.first_name,
-          lastName: swimmer.last_name,
-          yearOfBirth: swimmer.year_of_birth,
-          avatarUrl: swimmer.avatar_url,
-          country: swimmer.country,
-          gender: swimmer.gender,
-          clubId: swimmer.club_id,
-          userType: swimmer.user_type
-        }));
-        
-        setSwimmers(formattedSwimmers);
-      }
+      // Use the new service function
+      const swimmersList = await fetchSwimmersInClub(profile.clubId, profile.id);
+      setSwimmers(swimmersList);
     } catch (error: any) {
       console.error("Error fetching swimmers:", error);
       toast({
