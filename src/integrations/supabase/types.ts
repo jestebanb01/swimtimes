@@ -185,6 +185,14 @@ export type Database = {
           user_id: string
         }[]
       }
+      is_coach: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      swimmer_in_my_club: {
+        Args: { swimmer_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       user_type: "basic" | "coach"

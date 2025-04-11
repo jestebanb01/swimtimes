@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, Settings, Dumbbell, Waves, Users, List } from 'lucide-react';
+import { User, LogOut, Settings, Dumbbell, Waves, Users, List, BarChart2 } from 'lucide-react';
 import LanguageSelector from '@/components/LanguageSelector';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -47,6 +47,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             </Link>
             <Link to="/history" className="text-gray-600 hover:text-gray-900">
               {t('history')}
+            </Link>
+            <Link to="/head-to-head" className="text-gray-600 hover:text-gray-900">
+              Head to Head
             </Link>
             {isCoach && (
               <>
@@ -95,6 +98,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                   <Dumbbell className="mr-2 h-4 w-4" />
                   <span>{t('logTraining')}</span>
                 </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={() => navigate('/head-to-head')}
+                >
+                  <BarChart2 className="mr-2 h-4 w-4" />
+                  <span>Head to Head</span>
+                </DropdownMenuItem>
                 {isCoach && (
                   <>
                     <DropdownMenuItem 
@@ -127,7 +137,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         </div>
         
         <div className="md:hidden container mx-auto px-4 py-2 border-t border-gray-100">
-          <div className="flex justify-between space-x-4 text-sm">
+          <div className="flex flex-wrap justify-between space-x-2 text-sm">
             <Link to="/" className="text-gray-600 hover:text-gray-900 flex-1 text-center py-1">
               {t('dashboard')}
             </Link>
@@ -139,6 +149,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             </Link>
             <Link to="/history" className="text-gray-600 hover:text-gray-900 flex-1 text-center py-1">
               {t('history')}
+            </Link>
+            <Link to="/head-to-head" className="text-gray-600 hover:text-gray-900 flex-1 text-center py-1">
+              H2H
             </Link>
             {isCoach && (
               <>

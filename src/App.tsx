@@ -14,6 +14,7 @@ import Index from "./pages/Index";
 import LogSession from "./pages/LogSession";
 import LogTraining from "./pages/LogTraining";
 import History from "./pages/History";
+import HeadToHead from "./pages/HeadToHead";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -54,6 +55,11 @@ const App = () => (
                     <Route path="/history" element={
                       <ProtectedRoute>
                         <History />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/head-to-head" element={
+                      <ProtectedRoute>
+                        <HeadToHead />
                       </ProtectedRoute>
                     } />
                     <Route path="/profile" element={
