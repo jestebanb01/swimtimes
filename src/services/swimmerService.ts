@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { SwimSession, TrainingSession, UserProfile, SwimStyle, PoolLength, ChronoType, SessionType, TrainingIntensity } from '@/types/swim';
 
@@ -92,52 +91,109 @@ export interface SwimmerSession extends SwimSession {
 }
 
 export const fetchAllSwimmerSessions = async (): Promise<SwimmerSession[]> => {
-  // Join swim_sessions with profiles to get swimmer info
-  const { data, error } = await supabase
+  // First fetch all swim sessions
+  const { data: sessionsData, error: sessionsError } = await supabase
     .from('swim_sessions')
-    .select(`
-      *,
-      profiles:user_id (
+    .select('*')
+    .order('date', { ascending: false });
+    
+  if (sessionsError) {
+    console.error('Error fetching all swimmer sessions:', sessionsError);
+    return [];
+  }
+  
+  // Create a map to store user profile data
+  const userProfiles: Map<string, {
+    id: string;
+    firstName: string | null;
+    lastName: string | null;
+    yearOfBirth: number | null;
+    clubName: string | null;
+  }> = new Map();
+  
+  // Get unique user IDs from sessions
+  const userIds = [...new Set((sessionsData || []).map(session => session.user_id))];
+  
+  // Fetch all relevant profiles
+  if (userIds.length > 0) {
+    const { data: profilesData, error: profilesError } = await supabase
+      .from('profiles')
+      .select(`
         id,
         first_name,
         last_name,
         year_of_birth,
-        clubs:club_id (
-          name
-        )
-      )
-    `)
-    .order('date', { ascending: false });
-    
-  if (error) {
-    console.error('Error fetching all swimmer sessions:', error);
-    return [];
+        club_id
+      `)
+      .in('id', userIds);
+      
+    if (profilesError) {
+      console.error('Error fetching profiles:', profilesError);
+    } else {
+      // Get club data for profiles with club_id
+      const clubIds = profilesData
+        ?.filter(profile => profile.club_id)
+        .map(profile => profile.club_id) || [];
+      
+      const clubMap = new Map<string, string>();
+      
+      if (clubIds.length > 0) {
+        const { data: clubsData, error: clubsError } = await supabase
+          .from('clubs')
+          .select('id, name')
+          .in('id', clubIds);
+          
+        if (clubsError) {
+          console.error('Error fetching clubs:', clubsError);
+        } else {
+          // Create club name map
+          (clubsData || []).forEach(club => {
+            clubMap.set(club.id, club.name);
+          });
+        }
+      }
+      
+      // Store profiles in map
+      (profilesData || []).forEach(profile => {
+        userProfiles.set(profile.id, {
+          id: profile.id,
+          firstName: profile.first_name,
+          lastName: profile.last_name,
+          yearOfBirth: profile.year_of_birth,
+          clubName: profile.club_id ? clubMap.get(profile.club_id) || null : null
+        });
+      });
+    }
   }
   
-  // Convert from database format to application format
-  const formattedSessions: SwimmerSession[] = (data || []).map(session => ({
-    id: session.id,
-    date: new Date(session.date),
-    style: session.style as SwimStyle,
-    distance: session.distance,
-    time: {
-      minutes: session.minutes,
-      seconds: session.seconds,
-      centiseconds: session.centiseconds,
-    },
-    location: session.location,
-    description: session.description || '',
-    poolLength: session.pool_length as PoolLength,
-    chronoType: (session.chrono_type || 'manual') as ChronoType,
-    sessionType: (session.session_type || 'pool') as SessionType,
-    swimmer: {
-      id: session.profiles?.id || '',
-      firstName: session.profiles?.first_name,
-      lastName: session.profiles?.last_name,
-      yearOfBirth: session.profiles?.year_of_birth,
-      clubName: session.profiles?.clubs?.name,
-    },
-  }));
+  // Convert from database format to application format with proper swimmer data
+  const formattedSessions: SwimmerSession[] = (sessionsData || []).map(session => {
+    const profile = userProfiles.get(session.user_id) || {
+      id: session.user_id,
+      firstName: null,
+      lastName: null,
+      yearOfBirth: null,
+      clubName: null
+    };
+    
+    return {
+      id: session.id,
+      date: new Date(session.date),
+      style: session.style as SwimStyle,
+      distance: session.distance,
+      time: {
+        minutes: session.minutes,
+        seconds: session.seconds,
+        centiseconds: session.centiseconds,
+      },
+      location: session.location,
+      description: session.description || '',
+      poolLength: session.pool_length as PoolLength,
+      chronoType: (session.chrono_type || 'manual') as ChronoType,
+      sessionType: (session.session_type || 'pool') as SessionType,
+      swimmer: profile
+    };
+  });
   
   return formattedSessions;
 };
