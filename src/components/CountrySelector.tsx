@@ -43,13 +43,14 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
   
   return (
     <Select 
-      value={value || ''} 
+      value={value || 'none'} 
       onValueChange={onChange}
     >
       <SelectTrigger className={className}>
         <SelectValue placeholder={t('selectCountry')} />
       </SelectTrigger>
       <SelectContent>
+        <SelectItem value="none">{t('noCountry')}</SelectItem>
         {countries.map((country) => (
           <SelectItem key={country.code} value={country.code}>
             {language === 'es' ? country.namees : country.name}

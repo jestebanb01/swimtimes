@@ -259,14 +259,14 @@ const AllSessions: React.FC = () => {
                   {/* Group By */}
                   <div className="w-full md:w-48">
                     <Select
-                      value={groupBy || ''}
-                      onValueChange={(value) => setGroupBy(value || null)}
+                      value={groupBy || 'none'}
+                      onValueChange={(value) => setGroupBy(value === 'none' ? null : value)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder={t('groupBy')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">{t('noGrouping')}</SelectItem>
+                        <SelectItem value="none">{t('noGrouping')}</SelectItem>
                         <SelectItem value="style">{t('swimStyle')}</SelectItem>
                         <SelectItem value="club">{t('club')}</SelectItem>
                         <SelectItem value="year">{t('yearOfBirth')}</SelectItem>

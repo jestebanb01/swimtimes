@@ -69,8 +69,8 @@ const ClubSelector: React.FC<ClubSelectorProps> = ({
   
   return (
     <Select 
-      value={value || ''} 
-      onValueChange={(val) => onChange(val || null)}
+      value={value || 'none'} 
+      onValueChange={(val) => onChange(val === 'none' ? null : val)}
     >
       <SelectTrigger className={className} disabled={loading}>
         <SelectValue placeholder={t('selectClub')} />
