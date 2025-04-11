@@ -43,6 +43,15 @@ const HeadToHeadComparison: React.FC = () => {
       return;
     }
 
+    if (sessions.length === 0) {
+      toast({
+        title: "No personal data",
+        description: "You don't have any swim sessions to compare. Add some first!",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSearching(true);
     try {
       // Find user by name

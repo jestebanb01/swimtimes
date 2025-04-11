@@ -1,83 +1,52 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SwimSession, TrainingSession } from '@/types/swim';
-import { useLanguage } from '@/contexts/LanguageContext';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
 import SwimSessionsList from '@/components/SwimSessionsList';
 import TrainingSessionsList from '@/components/TrainingSessionsList';
+import SwimmerStatsCard from './SwimmerStatsCard';
+import { BarChart3, Waves, Dumbbell } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface SwimmerSessionsTabsProps {
   swimSessions: SwimSession[];
   trainingSessions: TrainingSession[];
 }
 
-const SwimmerSessionsTabs: React.FC<SwimmerSessionsTabsProps> = ({ 
-  swimSessions, 
-  trainingSessions 
+const SwimmerSessionsTabs: React.FC<SwimmerSessionsTabsProps> = ({
+  swimSessions,
+  trainingSessions,
 }) => {
+  const [activeTab, setActiveTab] = useState<string>('stats');
   const { t } = useLanguage();
 
   return (
-    <Tabs defaultValue="swim" className="w-full">
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="swim">{t('swimSessions')}</TabsTrigger>
-        <TabsTrigger value="training">{t('trainingSessions')}</TabsTrigger>
+    <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <TabsList className="grid grid-cols-3 mb-6">
+        <TabsTrigger value="stats" className="flex items-center gap-2">
+          <BarChart3 className="h-4 w-4" />
+          <span>Statistics</span>
+        </TabsTrigger>
+        <TabsTrigger value="swim" className="flex items-center gap-2">
+          <Waves className="h-4 w-4" />
+          <span>{t('swimSessions')}</span>
+        </TabsTrigger>
+        <TabsTrigger value="training" className="flex items-center gap-2">
+          <Dumbbell className="h-4 w-4" />
+          <span>{t('trainingSessions')}</span>
+        </TabsTrigger>
       </TabsList>
-      <TabsContent value="swim">
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('swimSessions')}</CardTitle>
-            <CardDescription>
-              {t('swimmersSwimSessions')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {swimSessions.length === 0 ? (
-              <div className="text-center py-6">
-                {t('noSwimSessions')}
-              </div>
-            ) : (
-              <SwimSessionsList 
-                sessions={swimSessions} 
-                readOnly={true}
-              />
-            )}
-          </CardContent>
-        </Card>
+
+      <TabsContent value="stats" className="mt-0">
+        <SwimmerStatsCard sessions={swimSessions} />
       </TabsContent>
-      <TabsContent value="training">
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('trainingSessions')}</CardTitle>
-            <CardDescription>
-              {t('swimmersTrainingSessions')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {trainingSessions.length === 0 ? (
-              <div className="text-center py-6">
-                {t('noTrainingSessions')}
-              </div>
-            ) : (
-              <TrainingSessionsList 
-                sessions={trainingSessions} 
-                readOnly={true}
-              />
-            )}
-          </CardContent>
-        </Card>
+
+      <TabsContent value="swim" className="mt-0">
+        <SwimSessionsList sessions={swimSessions} readOnly={true} />
+      </TabsContent>
+
+      <TabsContent value="training" className="mt-0">
+        <TrainingSessionsList sessions={trainingSessions} readOnly={true} />
       </TabsContent>
     </Tabs>
   );

@@ -32,6 +32,7 @@ export async function findUserByName(firstName: string, lastName: string) {
 
 export async function getOpponentSessions(opponentId: string) {
   // Use direct query to get another user's swim sessions
+  // This should work because we've set up a policy to allow all users to see all swim sessions
   const { data: directSessions, error: directError } = await supabase
     .from('swim_sessions')
     .select('*')
