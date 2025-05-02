@@ -4,7 +4,7 @@ import { fetchSwimmerProfile, fetchSwimmersInClub } from './profileService';
 import { 
   fetchSwimmerSwimSessions, 
   fetchAllSwimmerSessions,
-  SwimmerSession 
+  type SwimmerSession 
 } from './swimSessionsService';
 import { fetchSwimmerTrainingSessions } from './trainingSessionsService';
 
@@ -15,5 +15,7 @@ export {
   fetchSwimmerSwimSessions,
   fetchAllSwimmerSessions,
   fetchSwimmerTrainingSessions,
-  SwimmerSession
 };
+
+// Re-export types
+export type { SwimmerSession };
